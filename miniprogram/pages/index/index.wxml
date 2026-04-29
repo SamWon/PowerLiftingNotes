@@ -1,0 +1,79 @@
+<navigation-bar title="力量举训练" back="{{false}}"></navigation-bar>
+
+<view class="page-shell records-page">
+  <view class="app-head">
+    <view>
+      <view class="eyebrow">Powerlifting Log</view>
+      <view class="title">把每一次扎实训练留下来</view>
+    </view>
+    <button class="head-action" bindtap="startNewRecord" aria-label="新建训练记录">+</button>
+  </view>
+
+  <view class="stat-row">
+    <view class="stat-item">
+      <text class="stat-number">{{totalWorkouts}}</text>
+      <text class="stat-label">训练日</text>
+    </view>
+    <view class="stat-item">
+      <text class="stat-number">{{totalSets}}</text>
+      <text class="stat-label">总组数</text>
+    </view>
+  </view>
+
+  <view class="section-head">
+    <view>
+      <view class="section-title">训练记录</view>
+      <view class="section-subtitle">按日期由近到远排序</view>
+    </view>
+    <view class="switcher">
+      <button class="switch {{recordView === 'list' ? 'active' : ''}}" data-view="list" bindtap="switchRecordView">列表</button>
+      <button class="switch {{recordView === 'calendar' ? 'active' : ''}}" data-view="calendar" bindtap="switchRecordView">日历</button>
+    </view>
+  </view>
+
+  <view wx:if="{{recordView === 'list'}}">
+    <view wx:if="{{records.length === 0}}" class="empty-state">
+      <view class="empty-title">还没有训练记录</view>
+      <view class="empty-copy">从一次卧推、深蹲或硬拉开始。</view>
+      <button class="primary-button" bindtap="startNewRecord">创建第一条</button>
+    </view>
+    <view wx:for="{{records}}" wx:key="id" class="record-card">
+      <view class="record-top">
+        <view>
+          <view class="record-date">{{item.date}}</view>
+          <view class="record-meta">{{item.exercises.length}} 个动作</view>
+        </view>
+        <button class="ghost-button danger" data-id="{{item.id}}" bindtap="deleteRecord">删除</button>
+      </view>
+      <view wx:for="{{item.exercises}}" wx:for-item="exercise" wx:key="name" class="exercise-summary">
+        <view class="exercise-name">{{exercise.name}}</view>
+        <view class="set-chips">
+          <text wx:for="{{exercise.sets}}" wx:for-item="set" wx:key="index" class="set-chip">{{set.reps}}次 · RPE {{set.rpe}}</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <view wx:else class="calendar-panel">
+    <view class="calendar-head">
+      <button class="icon-button" data-offset="-1" bindtap="changeCalendarMonth">‹</button>
+      <view class="calendar-title">{{calendarTitle}}</view>
+      <button class="icon-button" data-offset="1" bindtap="changeCalendarMonth">›</button>
+    </view>
+    <view class="weekday-row">
+      <text>日</text><text>一</text><text>二</text><text>三</text><text>四</text><text>五</text><text>六</text>
+    </view>
+    <view class="calendar-grid">
+      <button wx:for="{{calendarDays}}" wx:key="key" class="calendar-day {{item.isCurrentMonth ? '' : 'muted'}} {{item.hasWorkout ? 'trained' : ''}} {{item.isSelected ? 'selected' : ''}}" data-date="{{item.date}}" bindtap="selectCalendarDate">
+        <text>{{item.label}}</text>
+      </button>
+    </view>
+    <view class="calendar-result">
+      <view class="selected-date">{{selectedCalendarDate}}</view>
+      <view wx:if="{{selectedCalendarRecords.length === 0}}" class="quiet-line">这天还没有训练记录。</view>
+      <view wx:for="{{selectedCalendarRecords}}" wx:key="id" class="mini-record">
+        <text wx:for="{{item.exercises}}" wx:for-item="exercise" wx:key="name">{{exercise.name}} </text>
+      </view>
+    </view>
+  </view>
+</view>

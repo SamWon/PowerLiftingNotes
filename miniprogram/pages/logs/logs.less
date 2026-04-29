@@ -1,0 +1,20 @@
+page {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  color: var(--text);
+  background: var(--page-bg);
+}
+.scrollarea {
+  flex: 1;
+  overflow-y: hidden;
+  background: var(--page-bg);
+}
+.log-item {
+  margin-top: 20rpx;
+  color: var(--text-soft);
+  text-align: center;
+}
+.log-item:last-child {
+  padding-bottom: env(safe-area-inset-bottom);
+}

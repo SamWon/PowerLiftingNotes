@@ -1,0 +1,76 @@
+<navigation-bar title="新建训练" back="{{false}}"></navigation-bar>
+
+<view class="page-shell create-page">
+  <view class="section-head">
+    <view>
+      <view class="eyebrow">New Session</view>
+      <view class="title">记录今天的主项</view>
+    </view>
+  </view>
+
+  <view class="form-block">
+    <view class="field-label">训练日期</view>
+    <picker mode="date" value="{{currentDate}}" end="{{todayText}}" bindchange="onDateChange">
+      <view class="date-picker">{{currentDate}}</view>
+    </picker>
+  </view>
+
+  <view class="form-block">
+    <view class="field-label">训练动作</view>
+    <button class="exercise-picker-button" bindtap="openExercisePicker">
+      <text>{{selectedExerciseName}}</text>
+      <text class="picker-hint">展开动作面板</text>
+    </button>
+  </view>
+
+  <view class="form-block">
+    <view class="field-row">
+      <view class="field-label">训练组</view>
+      <button class="ghost-button" bindtap="addSet">添加组数</button>
+    </view>
+    <view wx:for="{{draftSets}}" wx:key="index" class="set-row">
+      <view class="set-order">{{index + 1}}</view>
+      <view class="input-wrap">
+        <text>次数</text>
+        <input type="number" value="{{item.reps}}" data-index="{{index}}" bindinput="onSetRepsInput" />
+      </view>
+      <view class="input-wrap">
+        <text>RPE</text>
+        <input type="digit" value="{{item.rpe}}" data-index="{{index}}" bindinput="onSetRpeInput" />
+      </view>
+      <button class="remove-button" data-index="{{index}}" bindtap="removeSet">×</button>
+    </view>
+  </view>
+
+  <button class="secondary-button full" bindtap="addDraftExercise">保存当前动作并继续</button>
+
+  <view wx:if="{{draftExercises.length > 0}}" class="draft-list">
+    <view class="draft-title">本次已添加</view>
+    <view wx:for="{{draftExercises}}" wx:key="name" class="draft-item">
+      <view>
+        <view class="exercise-name">{{item.name}}</view>
+        <view class="record-meta">{{item.sets.length}} 组</view>
+      </view>
+      <button class="ghost-button danger" data-index="{{index}}" bindtap="removeDraftExercise">移除</button>
+    </view>
+  </view>
+
+  <button class="primary-button full" bindtap="saveRecord">保存训练记录</button>
+</view>
+
+<view wx:if="{{exercisePickerVisible}}" class="sheet-mask" bindtap="closeExercisePicker">
+  <view class="exercise-sheet" catchtap="noop">
+    <view class="sheet-handle"></view>
+    <view class="sheet-title">选择训练动作</view>
+    <view class="exercise-grid">
+      <button wx:for="{{exercises}}" wx:key="*this" class="exercise-option {{selectedExerciseName === item ? 'active' : ''}}" data-name="{{item}}" bindtap="chooseExercise">
+        <view class="exercise-thumb">图</view>
+        <view class="exercise-option-name">{{item}}</view>
+      </button>
+    </view>
+    <view class="new-exercise-row">
+      <input placeholder="添加新动作" value="{{newExerciseName}}" bindinput="onNewExerciseInput" />
+      <button bindtap="addExerciseOption">添加</button>
+    </view>
+  </view>
+</view>

@@ -1,0 +1,33 @@
+<navigation-bar title="关于" back="{{false}}"></navigation-bar>
+
+<view class="page-shell about-page">
+  <view class="section-head">
+    <view>
+      <view class="eyebrow">Powerlifting Notes</view>
+      <view class="title">本地训练日志与备份</view>
+    </view>
+  </view>
+
+  <view class="stat-row">
+    <view class="stat-item">
+      <text class="stat-number">{{totalWorkouts}}</text>
+      <text class="stat-label">训练日</text>
+    </view>
+    <view class="stat-item">
+      <text class="stat-number">{{totalSets}}</text>
+      <text class="stat-label">总组数</text>
+    </view>
+  </view>
+
+  <view class="about-card">
+    <view class="section-title">关于应用</view>
+    <view class="about-copy">用于快速记录卧推、深蹲、硬拉和其他训练动作。数据保存在本机，可通过 JSON 文件导入或导出备份。</view>
+  </view>
+
+  <view class="about-card">
+    <view class="section-title">数据备份</view>
+    <view class="about-copy">导入会覆盖当前记录，执行前会再次确认。</view>
+    <button class="primary-button full" bindtap="exportRecords">导出训练记录</button>
+    <button class="secondary-button full" bindtap="importRecords">导入并覆盖记录</button>
+  </view>
+</view>

@@ -1,0 +1,46 @@
+{
+  "pages": [
+    "pages/index/index",
+    "pages/create/create",
+    "pages/about/about",
+    "pages/logs/logs"
+  ],
+  "window": {
+    "navigationBarTextStyle": "white",
+    "navigationStyle": "custom",
+    "backgroundColor": "#070b10"
+  },
+  "darkmode": true,
+  "tabBar": {
+    "color": "#758895",
+    "selectedColor": "#23d3a6",
+    "backgroundColor": "#0e1620",
+    "borderStyle": "white",
+    "list": [
+      {
+        "pagePath": "pages/index/index",
+        "text": "记录"
+      },
+      {
+        "pagePath": "pages/create/create",
+        "text": "新建"
+      },
+      {
+        "pagePath": "pages/about/about",
+        "text": "关于"
+      }
+    ]
+  },
+  "style": "v2",
+  "rendererOptions": {
+    "skyline": {
+      "defaultDisplayBlock": true,
+      "disableABTest": true,
+      "sdkVersionBegin": "3.0.0",
+      "sdkVersionEnd": "15.255.255"
+    }
+  },
+  "componentFramework": "glass-easel",
+  "sitemapLocation": "sitemap.json",
+  "lazyCodeLoading": "requiredComponents"
+}
