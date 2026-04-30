@@ -40,35 +40,43 @@ Component({
     },
     exportRecords() {
       const payload: ExportPayload = buildExportPayload(this.data.records)
+      const jsonStr = JSON.stringify(payload, null, 2)
       const fileName = `力量举训练记录_${toDateText(new Date())}.json`
       const filePath = `${wx.env.USER_DATA_PATH}/${fileName}`
       wx.getFileSystemManager().writeFile({
         filePath,
-        data: JSON.stringify(payload, null, 2),
+        data: jsonStr,
         encoding: 'utf8',
-        success: () => this.shareExportedFile(filePath, fileName),
+        success: () => this.shareExportedFile(filePath, fileName, jsonStr),
         fail: () => wx.showToast({ title: '导出失败', icon: 'none' }),
       })
     },
-    shareExportedFile(filePath: string, fileName: string) {
-      const wxWithShare = wx as unknown as { shareFileMessage?: (option: ShareFileMessageOption) => void }
-      if (typeof wxWithShare.shareFileMessage === 'function') {
-        wxWithShare.shareFileMessage({
-          filePath,
-          fileName,
-          success: () => wx.showToast({ title: '已生成导出文件', icon: 'success' }),
-          fail: () => wx.showToast({ title: '已取消导出', icon: 'none' }),
-        })
-        return
-      }
+    shareExportedFile(filePath: string, fileName: string, jsonStr: string) {
+      // 优先尝试保存到本地磁盘（PC 微信可用）
       wx.saveFileToDisk({
         filePath,
-        success: () => wx.showToast({ title: '已保存文件', icon: 'success' }),
-        fail: () => wx.showModal({
-          title: '导出文件已生成',
-          content: `文件路径：${filePath}`,
-          showCancel: false,
-        }),
+        success: () => wx.showToast({ title: '文件已保存到本地', icon: 'success' }),
+        fail: () => {
+          // PC 不可用时，尝试通过微信转发文件（手机端）
+          const wxWithShare = wx as unknown as { shareFileMessage?: (option: ShareFileMessageOption) => void }
+          if (typeof wxWithShare.shareFileMessage === 'function') {
+            wxWithShare.shareFileMessage({
+              filePath,
+              fileName,
+              success: () => wx.showToast({ title: '文件已分享', icon: 'success' }),
+              fail: () => this.copyJsonToClipboard(jsonStr),
+            })
+          } else {
+            this.copyJsonToClipboard(jsonStr)
+          }
+        },
+      })
+    },
+    copyJsonToClipboard(jsonStr: string) {
+      wx.setClipboardData({
+        data: jsonStr,
+        success: () => wx.showToast({ title: '已复制到剪贴板', icon: 'success' }),
+        fail: () => wx.showToast({ title: '导出失败', icon: 'none' }),
       })
     },
     importRecords() {
