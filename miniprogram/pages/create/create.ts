@@ -1,20 +1,40 @@
 import {
   DEFAULT_EXERCISES,
   DraftSet,
+  ExerciseDefinition,
   TrainingExercise,
   TrainingRecord,
   createDefaultSet,
+  getExerciseDefinition,
   isTrainingSet,
   loadExerciseOptions,
   loadTrainingRecords,
   saveExerciseOptions,
   saveTrainingRecords,
   toDateText,
-} from '../../utils/training'
+} from '../../utils/training/index'
+
+interface ExerciseCard {
+  name: string
+  description: string
+  imageUrl: string
+}
+
+const buildExerciseCards = (names: string[]): ExerciseCard[] => {
+  return names.map(name => {
+    const def: ExerciseDefinition | undefined = getExerciseDefinition(name)
+    return {
+      name,
+      description: def?.description || '自定义动作',
+      imageUrl: def?.imageUrl || '',
+    }
+  })
+}
 
 Component({
   data: {
     exercises: DEFAULT_EXERCISES,
+    exerciseCards: buildExerciseCards(DEFAULT_EXERCISES) as ExerciseCard[],
     exercisePickerVisible: false,
     newExerciseName: '',
     selectedExerciseName: DEFAULT_EXERCISES[0],
@@ -38,6 +58,7 @@ Component({
       const exercises = loadExerciseOptions()
       this.setData({
         exercises,
+        exerciseCards: buildExerciseCards(exercises),
         selectedExerciseName: exercises.includes(this.data.selectedExerciseName) ? this.data.selectedExerciseName : exercises[0],
       })
     },
@@ -66,7 +87,7 @@ Component({
       }
       const exercises = [...this.data.exercises, name]
       saveExerciseOptions(exercises)
-      this.setData({ exercises, selectedExerciseName: name, exercisePickerVisible: false, newExerciseName: '' })
+      this.setData({ exercises, exerciseCards: buildExerciseCards(exercises), selectedExerciseName: name, exercisePickerVisible: false, newExerciseName: '' })
     },
     onDateChange(event: any) {
       this.setData({ currentDate: event.detail.value })

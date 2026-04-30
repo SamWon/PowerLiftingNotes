@@ -1,0 +1,45 @@
+/**
+ * 设计令牌（design tokens）— LESS 侧。
+ *
+ * 全部颜色 / 表面 / 间距统一在此集中维护。
+ * 各页面/组件请使用 var(--token-name)，禁止再写裸色值。
+ *
+ * 与 utils/theme.ts 一一对应：在 wx.setTabBarStyle / showModal confirmColor 等
+ * 仅能传字符串的 API 处，请从 utils/theme.ts 取色，确保与本文件保持一致。
+ */
+
+page {
+  /* ---------- Surfaces ---------- */
+  --page-bg: #070a10;
+  --surface: #10151f;
+  --surface-soft: #161d2a;
+  --surface-strong: #1e2738;
+
+  /* ---------- Text ---------- */
+  --text: #f5f8fc;
+  --text-soft: #c4cdde;
+  --text-muted: #8a96aa;
+  --text-on-brand: #ffffff;
+
+  /* ---------- Borders & shadows ---------- */
+  --line: rgba(255, 255, 255, 0.06);
+  --line-soft: rgba(255, 255, 255, 0.04);
+  --shadow: rgba(0, 0, 0, 0.55);
+
+  /* ---------- Brand ---------- */
+  --brand: #4f8cff;
+  --brand-soft: rgba(79, 140, 255, 0.14);
+  --brand-shadow: rgba(79, 140, 255, 0.30);
+  --brand-strong: #6ddcd0;
+  --brand-strong-soft: rgba(109, 220, 208, 0.16);
+  --accent: #f5b769;
+
+  /* ---------- Status ---------- */
+  --danger: #ff5d75;
+  --danger-soft: rgba(255, 93, 117, 0.12);
+
+  /* ---------- TabBar （与 utils/theme.ts 对齐） ---------- */
+  --tabbar-bg: #0e1620;
+  --tabbar-color: #758895;
+  --tabbar-color-active: #23d3a6;
+}

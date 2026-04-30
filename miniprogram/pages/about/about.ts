@@ -1,12 +1,14 @@
 import {
   ExportPayload,
   TrainingRecord,
+  buildExportPayload,
   countSets,
   loadTrainingRecords,
   normalizeImportedRecords,
   saveTrainingRecords,
   toDateText,
-} from '../../utils/training'
+} from '../../utils/training/index'
+import { themeColors } from '../../utils/theme'
 
 interface ShareFileMessageOption {
   filePath: string
@@ -37,12 +39,7 @@ Component({
       this.setData({ records, totalWorkouts: records.length, totalSets: countSets(records) })
     },
     exportRecords() {
-      const payload: ExportPayload = {
-        app: 'PowerLiftingNotes',
-        version: 1,
-        exportedAt: new Date().toISOString(),
-        records: this.data.records,
-      }
+      const payload: ExportPayload = buildExportPayload(this.data.records)
       const fileName = `力量举训练记录_${toDateText(new Date())}.json`
       const filePath = `${wx.env.USER_DATA_PATH}/${fileName}`
       wx.getFileSystemManager().writeFile({
@@ -79,7 +76,7 @@ Component({
         title: '导入会覆盖当前数据',
         content: '请选择一个或多个导出的 JSON 文件。导入成功后，现有训练记录会被覆盖。',
         confirmText: '继续导入',
-        confirmColor: '#23d3a6',
+        confirmColor: themeColors.brandStrong,
         success: (modalResult) => {
           if (!modalResult.confirm) {
             return

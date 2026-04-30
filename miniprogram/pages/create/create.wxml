@@ -1,11 +1,10 @@
 <navigation-bar title="新建训练" back="{{false}}"></navigation-bar>
 
 <view class="page-shell create-page">
-  <view class="section-head">
-    <view>
-      <view class="eyebrow">New Session</view>
-      <view class="title">记录今天的主项</view>
-    </view>
+  <view class="hero">
+    <view class="eyebrow">New Session</view>
+    <view class="title">记录今天的主项</view>
+    <view class="subtitle">选择动作、填入次数与 RPE，保存即可</view>
   </view>
 
   <view class="form-block">
@@ -14,19 +13,19 @@
       <view class="date-picker">{{currentDate}}</view>
     </picker>
   </view>
-
+  
   <view class="form-block">
     <view class="field-label">训练动作</view>
     <button class="exercise-picker-button" bindtap="openExercisePicker">
       <text>{{selectedExerciseName}}</text>
-      <text class="picker-hint">展开动作面板</text>
+      <text class="picker-hint">展开 ›</text>
     </button>
   </view>
 
   <view class="form-block">
     <view class="field-row">
-      <view class="field-label">训练组</view>
-      <button class="ghost-button" bindtap="addSet">添加组数</button>
+      <view class="field-label" style="margin-bottom:0">训练组</view>
+      <button class="ghost-button" bindtap="addSet">+ 添加组数</button>
     </view>
     <view wx:for="{{draftSets}}" wx:key="index" class="set-row">
       <view class="set-order">{{index + 1}}</view>
@@ -38,7 +37,7 @@
         <text>RPE</text>
         <input type="digit" value="{{item.rpe}}" data-index="{{index}}" bindinput="onSetRpeInput" />
       </view>
-      <button class="remove-button" data-index="{{index}}" bindtap="removeSet">×</button>
+      <button class="remove-button" data-index="{{index}}" bindtap="removeSet">✕</button>
     </view>
   </view>
 
@@ -63,9 +62,13 @@
     <view class="sheet-handle"></view>
     <view class="sheet-title">选择训练动作</view>
     <view class="exercise-grid">
-      <button wx:for="{{exercises}}" wx:key="*this" class="exercise-option {{selectedExerciseName === item ? 'active' : ''}}" data-name="{{item}}" bindtap="chooseExercise">
-        <view class="exercise-thumb">图</view>
-        <view class="exercise-option-name">{{item}}</view>
+      <button wx:for="{{exerciseCards}}" wx:key="name" class="exercise-option {{selectedExerciseName === item.name ? 'active' : ''}}" data-name="{{item.name}}" bindtap="chooseExercise">
+        <view class="exercise-thumb">
+          <image wx:if="{{item.imageUrl}}" src="{{item.imageUrl}}" mode="aspectFill" class="exercise-thumb-img" />
+          <text wx:else>图</text>
+        </view>
+        <view class="exercise-option-name">{{item.name}}</view>
+        <view class="exercise-option-desc">{{item.description}}</view>
       </button>
     </view>
     <view class="new-exercise-row">

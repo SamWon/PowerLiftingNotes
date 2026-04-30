@@ -1,9 +1,11 @@
 // app.ts
+import { themeColors } from './utils/theme'
+
 const applyTabBarTheme = () => {
   wx.setTabBarStyle({
-    color: '#758895',
-    selectedColor: '#23d3a6',
-    backgroundColor: '#0e1620',
+    color: themeColors.tabBarColor,
+    selectedColor: themeColors.tabBarColorActive,
+    backgroundColor: themeColors.tabBarBg,
     borderStyle: 'white',
   })
 }

@@ -1,12 +1,10 @@
 <navigation-bar title="力量举训练" back="{{false}}"></navigation-bar>
 
 <view class="page-shell records-page">
-  <view class="app-head">
-    <view>
-      <view class="eyebrow">Powerlifting Log</view>
-      <view class="title">把每一次扎实训练留下来</view>
-    </view>
-    <button class="head-action" bindtap="startNewRecord" aria-label="新建训练记录">+</button>
+  <view class="hero">
+    <view class="eyebrow">Powerlifting Log</view>
+    <view class="title">把每一次扎实训练留下来</view>
+    <view class="subtitle">追踪卧推、深蹲与硬拉的每一组数据</view>
   </view>
 
   <view class="stat-row">
@@ -56,24 +54,32 @@
 
   <view wx:else class="calendar-panel">
     <view class="calendar-head">
-      <button class="icon-button" data-offset="-1" bindtap="changeCalendarMonth">‹</button>
+      <view class="icon-button" data-offset="-1" bindtap="changeCalendarMonth">‹</view>
       <view class="calendar-title">{{calendarTitle}}</view>
-      <button class="icon-button" data-offset="1" bindtap="changeCalendarMonth">›</button>
+      <view class="icon-button" data-offset="1" bindtap="changeCalendarMonth">›</view>
     </view>
     <view class="weekday-row">
       <text>日</text><text>一</text><text>二</text><text>三</text><text>四</text><text>五</text><text>六</text>
     </view>
     <view class="calendar-grid">
-      <button wx:for="{{calendarDays}}" wx:key="key" class="calendar-day {{item.isCurrentMonth ? '' : 'muted'}} {{item.hasWorkout ? 'trained' : ''}} {{item.isSelected ? 'selected' : ''}}" data-date="{{item.date}}" bindtap="selectCalendarDate">
-        <text>{{item.label}}</text>
-      </button>
-    </view>
-    <view class="calendar-result">
-      <view class="selected-date">{{selectedCalendarDate}}</view>
-      <view wx:if="{{selectedCalendarRecords.length === 0}}" class="quiet-line">这天还没有训练记录。</view>
-      <view wx:for="{{selectedCalendarRecords}}" wx:key="id" class="mini-record">
-        <text wx:for="{{item.exercises}}" wx:for-item="exercise" wx:key="name">{{exercise.name}} </text>
+      <view wx:for="{{calendarDays}}" wx:key="key" class="calendar-day {{item.isCurrentMonth ? '' : 'muted'}} {{item.hasWorkout ? 'trained' : ''}} {{item.isSelected ? 'selected' : ''}} {{item.isToday ? 'today' : ''}}" data-date="{{item.date}}" bindtap="selectCalendarDate">
+        <text class="day-number">{{item.label}}</text>
+        <text wx:if="{{item.hasWorkout}}" class="day-badge">{{item.setCount}}组</text>
       </view>
+    </view>
+    <view class="calendar-meta">
+      <text>本月 {{monthRecords.length}} 个训练日 · {{monthSetCount}} 组</text>
+    </view>
+    <view wx:if="{{monthRecords.length > 0}}" class="month-record-list">
+      <view wx:for="{{monthRecords}}" wx:key="id" class="month-record-item">
+        <view class="month-record-date">{{item.date}}</view>
+        <view class="month-record-body">
+          <text wx:for="{{item.exercises}}" wx:for-item="exercise" wx:key="name" class="set-chip">{{exercise.name}} · {{exercise.sets.length}}组</text>
+        </view>
+      </view>
+    </view>
+    <view wx:else class="calendar-empty">
+      <text class="quiet-line">本月还没有训练记录。</text>
     </view>
   </view>
 </view>
