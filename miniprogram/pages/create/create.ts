@@ -59,7 +59,7 @@ const resolveGroupOfExercise = (name: string, groups: ExerciseGroupView[]): Musc
   if (def) {
     return def.muscleGroup
   }
-  return groups[0]?.id || 'chest'
+  return (groups[0] ? groups[0].id : undefined) || 'chest'
 }
 
 /** 把 1RM × 百分比按 0.5kg 精度换算成 kg，便于杠铃配重。 */
@@ -173,7 +173,7 @@ Component({
         return
       }
       const existing = loadTrainingRecords().find(record => record.date === date)
-      this.setData({ note: existing?.note || '' })
+      this.setData({ note: (existing ? existing.note : undefined) || '' })
     },
     cancelEditing() {
       this.setData({

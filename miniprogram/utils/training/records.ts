@@ -31,9 +31,9 @@ export const countSets = (records: TrainingRecord[]) => {
  * 规范化历史数据：缺失的 weight 字段补 0，便于向后兼容旧版本导出 / 旧本地存储。
  */
 export const normalizeSet = (value: any): TrainingSet => ({
-  reps: Number(value?.reps),
-  rpe: Number(value?.rpe),
-  weight: Number.isFinite(Number(value?.weight)) ? Number(value.weight) : 0,
+  reps: Number(value ? value.reps : undefined),
+  rpe: Number(value ? value.rpe : undefined),
+  weight: Number.isFinite(Number(value ? value.weight : undefined)) ? Number(value.weight) : 0,
 })
 
 export const normalizeRecord = (record: TrainingRecord): TrainingRecord => ({
@@ -48,9 +48,9 @@ export const normalizeRecord = (record: TrainingRecord): TrainingRecord => ({
 export const isTrainingSet = (value: unknown): value is TrainingSet => {
   const item = value as TrainingSet
   return (
-    Number.isFinite(item?.reps)
-    && Number.isFinite(item?.rpe)
-    && Number.isFinite(item?.weight)
+    Number.isFinite(item ? item.reps : undefined)
+    && Number.isFinite(item ? item.rpe : undefined)
+    && Number.isFinite(item ? item.weight : undefined)
     && item.reps > 0
     && item.rpe >= 1
     && item.rpe <= 10
@@ -61,13 +61,13 @@ export const isTrainingSet = (value: unknown): value is TrainingSet => {
 export const isTrainingRecord = (value: unknown): value is TrainingRecord => {
   const item = value as TrainingRecord
   return (
-    typeof item?.id === 'string'
+    typeof (item ? item.id : undefined) === 'string'
     && /^\d{4}-\d{2}-\d{2}$/.test(item.date)
     && Number.isFinite(item.createdAt)
     && Array.isArray(item.exercises)
     && item.exercises.every(
       exercise =>
-        typeof exercise?.name === 'string'
+        typeof (exercise ? exercise.name : undefined) === 'string'
         && exercise.name.length > 0
         && Array.isArray(exercise.sets)
         && exercise.sets.length > 0

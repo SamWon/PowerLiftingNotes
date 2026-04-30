@@ -108,6 +108,7 @@
 - 颜色 / 间距 / 圆角等样式 token 集中维护，不写裸色值。
 - 修改用户可见行为时，**同步更新本文件**（见顶部"维护约定"）。
 - **小按钮一律用 `<view bindtap>` 实现**：在 Skyline 渲染下原生 `<button>` 的固定宽度容易被默认样式覆盖、把同行控件挤压成 0 宽，因此除"全宽主/次按钮"外（如 `.primary-button.full` / `.secondary-button.full` / `.exercise-picker-button` / `.exercise-option`），所有 ghost / 图标 / 切换类按钮都使用 view 模拟，避免布局漂移。
+- **禁止使用可选链 `?.` 语法**：微信小程序 JS 运行时不支持 `?.` 可选链语法（会抛出 `SyntaxError: Unexpected token .`）。所有涉及可能为空的属性访问，必须改用显式三元表达式，例如 `obj?.prop` → `obj ? obj.prop : undefined`。TypeScript `target` 设为 `ES5` 可让编译器自动降级，但若项目使用 `ES2020` 则需手动替换。
 
 ## 后续扩展方向
 
