@@ -1,10 +1,15 @@
-<navigation-bar title="新建训练" back="{{false}}"></navigation-bar>
+<navigation-bar title="{{isEditing ? '编辑训练' : '新建训练'}}" back="{{false}}"></navigation-bar>
 
 <view class="page-shell create-page">
   <view class="hero">
-    <view class="eyebrow">New Session</view>
-    <view class="title">记录今天的主项</view>
-    <view class="subtitle">选择动作、填入次数与 RPE，保存即可</view>
+    <view class="eyebrow">{{isEditing ? 'Edit Session' : 'New Session'}}</view>
+    <view class="title">{{isEditing ? '修改这次训练' : '记录今天的主项'}}</view>
+    <view class="subtitle">选择动作、填入次数、重量与 RPE，保存即可</view>
+  </view>
+
+  <view wx:if="{{isEditing}}" class="edit-banner">
+    <view>正在编辑 {{currentDate}} 的训练记录</view>
+    <view class="ghost-button" bindtap="cancelEditing">取消编辑</view>
   </view>
 
   <view class="form-block">
@@ -12,68 +17,115 @@
     <picker mode="date" value="{{currentDate}}" end="{{todayText}}" bindchange="onDateChange">
       <view class="date-picker">{{currentDate}}</view>
     </picker>
+    <input
+      class="note-input"
+      placeholder="副标题（选填，记录今天的状态/补充信息）"
+      value="{{note}}"
+      maxlength="60"
+      bindinput="onNoteInput"
+    />
   </view>
-  
+
   <view class="form-block">
     <view class="field-label">训练动作</view>
     <button class="exercise-picker-button" bindtap="openExercisePicker">
       <text>{{selectedExerciseName}}</text>
       <text class="picker-hint">展开 ›</text>
     </button>
+    <view class="one-rm-row">
+      <view class="one-rm-label">
+        <text class="one-rm-tag">1RM</text>
+        <text wx:if="{{selectedOneRepMax > 0}}" class="one-rm-value">{{selectedOneRepMax}} kg</text>
+        <text wx:else class="one-rm-empty">未设置</text>
+      </view>
+      <view class="ghost-button" bindtap="editOneRepMax">{{selectedOneRepMax > 0 ? '修改' : '设置'}}</view>
+    </view>
   </view>
 
   <view class="form-block">
     <view class="field-row">
       <view class="field-label" style="margin-bottom:0">训练组</view>
-      <button class="ghost-button" bindtap="addSet">+ 添加组数</button>
+      <view class="ghost-button" bindtap="addSet">+ 添加组数</view>
     </view>
-    <view wx:for="{{draftSets}}" wx:key="index" class="set-row">
-      <view class="set-order">{{index + 1}}</view>
-      <view class="input-wrap">
-        <text>次数</text>
-        <input type="number" value="{{item.reps}}" data-index="{{index}}" bindinput="onSetRepsInput" />
+    <view wx:for="{{draftSets}}" wx:key="index" class="set-card">
+      <view class="set-card-head">
+        <view class="set-order">{{index + 1}}</view>
+        <block wx:if="{{item.inputMode === 'weight'}}">
+          <view class="input-wrap weight-input">
+            <text>重量</text>
+            <input type="digit" placeholder="kg" value="{{item.weight}}" data-index="{{index}}" bindinput="onSetWeightInput" />
+            <text class="unit">kg</text>
+          </view>
+        </block>
+        <block wx:else>
+          <view class="input-wrap weight-input">
+            <text>1RM</text>
+            <input type="digit" placeholder="%" value="{{item.percent}}" data-index="{{index}}" bindinput="onSetPercentInput" />
+            <text class="unit">%</text>
+          </view>
+        </block>
+        <view wx:if="{{selectedOneRepMax > 0}}" class="mode-toggle" data-index="{{index}}" bindtap="toggleSetInputMode">
+          {{item.inputMode === 'weight' ? '%' : 'kg'}}
+        </view>
+        <view class="remove-button" data-index="{{index}}" bindtap="removeSet">✕</view>
       </view>
-      <view class="input-wrap">
-        <text>RPE</text>
-        <input type="digit" value="{{item.rpe}}" data-index="{{index}}" bindinput="onSetRpeInput" />
+      <view wx:if="{{item.inputMode === 'percent' && selectedOneRepMax > 0 && item.weight !== ''}}" class="conversion-hint">
+        ≈ {{item.weight}} kg
       </view>
-      <button class="remove-button" data-index="{{index}}" bindtap="removeSet">✕</button>
+      <view wx:if="{{item.inputMode === 'weight' && selectedOneRepMax > 0 && item.percent !== '' && item.weight !== ''}}" class="conversion-hint">
+        ≈ {{item.percent}}% 1RM
+      </view>
+      <view class="set-card-body">
+        <view class="input-wrap">
+          <text>次数</text>
+          <input type="number" value="{{item.reps}}" data-index="{{index}}" bindinput="onSetRepsInput" />
+        </view>
+        <view class="input-wrap">
+          <text>RPE</text>
+          <input type="digit" value="{{item.rpe}}" data-index="{{index}}" bindinput="onSetRpeInput" />
+        </view>
+      </view>
     </view>
   </view>
 
-  <button class="secondary-button full" bindtap="addDraftExercise">保存当前动作并继续</button>
-
-  <view wx:if="{{draftExercises.length > 0}}" class="draft-list">
-    <view class="draft-title">本次已添加</view>
-    <view wx:for="{{draftExercises}}" wx:key="name" class="draft-item">
-      <view>
-        <view class="exercise-name">{{item.name}}</view>
-        <view class="record-meta">{{item.sets.length}} 组</view>
-      </view>
-      <button class="ghost-button danger" data-index="{{index}}" bindtap="removeDraftExercise">移除</button>
-    </view>
-  </view>
-
-  <button class="primary-button full" bindtap="saveRecord">保存训练记录</button>
+  <button class="primary-button full" bindtap="saveRecord">{{isEditing ? '保存修改' : '保存训练记录'}}</button>
 </view>
 
 <view wx:if="{{exercisePickerVisible}}" class="sheet-mask" bindtap="closeExercisePicker">
   <view class="exercise-sheet" catchtap="noop">
     <view class="sheet-handle"></view>
     <view class="sheet-title">选择训练动作</view>
-    <view class="exercise-grid">
-      <button wx:for="{{exerciseCards}}" wx:key="name" class="exercise-option {{selectedExerciseName === item.name ? 'active' : ''}}" data-name="{{item.name}}" bindtap="chooseExercise">
-        <view class="exercise-thumb">
-          <image wx:if="{{item.imageUrl}}" src="{{item.imageUrl}}" mode="aspectFill" class="exercise-thumb-img" />
-          <text wx:else>图</text>
-        </view>
-        <view class="exercise-option-name">{{item.name}}</view>
-        <view class="exercise-option-desc">{{item.description}}</view>
-      </button>
-    </view>
-    <view class="new-exercise-row">
-      <input placeholder="添加新动作" value="{{newExerciseName}}" bindinput="onNewExerciseInput" />
-      <button bindtap="addExerciseOption">添加</button>
-    </view>
+    <scroll-view scroll-x="{{true}}" enhanced="{{true}}" show-scrollbar="{{false}}" class="exercise-tabs">
+      <view
+        wx:for="{{exerciseGroups}}"
+        wx:key="id"
+        class="exercise-tab {{activeGroupId === item.id ? 'active' : ''}}"
+        data-id="{{item.id}}"
+        bindtap="switchExerciseGroup"
+      >
+        {{item.label}}
+      </view>
+    </scroll-view>
+    <block wx:for="{{exerciseGroups}}" wx:key="id" wx:for-item="group">
+      <view wx:if="{{activeGroupId === group.id}}" class="exercise-grid">
+        <button
+          wx:for="{{group.cards}}"
+          wx:key="name"
+          wx:for-item="item"
+          class="exercise-option {{selectedExerciseName === item.name ? 'active' : ''}}"
+          data-name="{{item.name}}"
+          bindtap="chooseExercise"
+        >
+          <view class="exercise-thumb">
+            <image wx:if="{{item.imageUrl}}" src="{{item.imageUrl}}" mode="aspectFill" class="exercise-thumb-img" />
+            <view wx:else class="exercise-thumb-fallback">
+              <text class="exercise-thumb-initial">{{item.initial}}</text>
+            </view>
+          </view>
+          <view class="exercise-option-name">{{item.name}}</view>
+          <view wx:if="{{item.description}}" class="exercise-option-desc">{{item.description}}</view>
+        </button>
+      </view>
+    </block>
   </view>
 </view>

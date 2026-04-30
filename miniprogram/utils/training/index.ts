@@ -14,10 +14,14 @@ export * from './migration'
 export {
   DEFAULT_EXERCISE_NAMES as DEFAULT_EXERCISES,
   EXERCISE_CATALOG,
+  MUSCLE_GROUPS,
   getExerciseDefinition,
+  getExercisesByMuscleGroup,
   isBuiltInExercise,
 } from '../../config/exercises'
 export type {
   ExerciseCategory,
   ExerciseDefinition,
+  MuscleGroup,
+  MuscleGroupDefinition,
 } from '../../config/exercises'

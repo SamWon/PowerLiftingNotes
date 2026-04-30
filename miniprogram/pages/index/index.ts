@@ -1,8 +1,11 @@
 import {
   CalendarDay,
+  OneRepMaxMap,
+  TrainingExercise,
   TrainingRecord,
-  countSets,
+  TrainingSet,
   formatMonthTitle,
+  loadOneRepMaxMap,
   loadTrainingRecords,
   parseDateText,
   saveTrainingRecords,
@@ -10,20 +13,67 @@ import {
 } from '../../utils/training/index'
 import { themeColors } from '../../utils/theme'
 
-type RecordView = 'list' | 'calendar'
+type RecordViewMode = 'list' | 'calendar'
+
+interface SetChip {
+  /** 主文本：5次 · 100kg · RPE 7（重量为 0 时不显示重量） */
+  text: string
+  /** 副文本：1RM 百分比；仅在该动作存在 1RM 时显示 */
+  percent: string
+}
+
+interface ExerciseViewModel {
+  name: string
+  sets: SetChip[]
+}
+
+interface RecordViewModel {
+  id: string
+  date: string
+  createdAt: number
+  exerciseCount: number
+  exercises: ExerciseViewModel[]
+  note: string
+}
+
+const EDITING_KEY = 'powerlifting_editing_record_id'
+
+const buildSetChip = (set: TrainingSet, oneRepMax: number): SetChip => {
+  const parts: string[] = [`${set.reps}次`]
+  if (set.weight > 0) {
+    parts.push(`${set.weight}kg`)
+  }
+  parts.push(`RPE ${set.rpe}`)
+  const percent = oneRepMax > 0 && set.weight > 0
+    ? `${Math.round((set.weight / oneRepMax) * 100)}% 1RM`
+    : ''
+  return { text: parts.join(' · '), percent }
+}
+
+const buildRecordViewModel = (record: TrainingRecord, oneRepMaxMap: OneRepMaxMap): RecordViewModel => ({
+  id: record.id,
+  date: record.date,
+  createdAt: record.createdAt,
+  exerciseCount: record.exercises.length,
+  exercises: record.exercises.map((exercise: TrainingExercise) => ({
+    name: exercise.name,
+    sets: exercise.sets.map(set => buildSetChip(set, oneRepMaxMap[exercise.name] || 0)),
+  })),
+  note: record.note || '',
+})
 
 Component({
   data: {
-    recordView: 'list' as RecordView,
+    recordView: 'list' as RecordViewMode,
     records: [] as TrainingRecord[],
+    recordViews: [] as RecordViewModel[],
+    oneRepMaxMap: {} as OneRepMaxMap,
     calendarDays: [] as CalendarDay[],
     calendarTitle: '',
     selectedCalendarDate: toDateText(new Date()),
     selectedCalendarRecords: [] as TrainingRecord[],
     monthRecords: [] as TrainingRecord[],
     monthSetCount: 0,
-    totalWorkouts: 0,
-    totalSets: 0,
   },
   lifetimes: {
     attached() {
@@ -38,19 +88,26 @@ Component({
   methods: {
     loadLocalData() {
       const records = loadTrainingRecords()
+      const oneRepMaxMap = loadOneRepMaxMap()
       this.setData({
         records,
-        totalWorkouts: records.length,
-        totalSets: countSets(records),
+        oneRepMaxMap,
+        recordViews: records.map(record => buildRecordViewModel(record, oneRepMaxMap)),
       })
       this.refreshCalendar()
     },
     switchRecordView(event: any) {
-      const recordView = event.currentTarget.dataset.view as RecordView
+      const recordView = event.currentTarget.dataset.view as RecordViewMode
       this.setData({ recordView })
       this.refreshCalendar()
     },
     startNewRecord() {
+      wx.removeStorageSync(EDITING_KEY)
+      wx.switchTab({ url: '/pages/create/create' })
+    },
+    editRecord(event: any) {
+      const id = event.currentTarget.dataset.id as string
+      wx.setStorageSync(EDITING_KEY, id)
       wx.switchTab({ url: '/pages/create/create' })
     },
     deleteRecord(event: any) {
@@ -66,7 +123,11 @@ Component({
           }
           const records = this.data.records.filter(record => record.id !== id)
           saveTrainingRecords(records)
-          this.setData({ records, totalWorkouts: records.length, totalSets: countSets(records) })
+          const oneRepMaxMap = this.data.oneRepMaxMap
+          this.setData({
+            records,
+            recordViews: records.map(record => buildRecordViewModel(record, oneRepMaxMap)),
+          })
           this.refreshCalendar()
         },
       })
