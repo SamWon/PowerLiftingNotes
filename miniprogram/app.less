@@ -797,6 +797,64 @@ button::after {
   border-color: var(--brand);
 }
 
+/* ===== Exercise tabs grid (image + name cards) ===== */
+.exercise-tabs-grid {
+  flex: 0 0 auto;
+  display: flex;
+  gap: 14rpx;
+  margin-bottom: 24rpx;
+}
+
+.exercise-tab-card {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 16rpx 4rpx 14rpx;
+  background: var(--surface-soft);
+  border: 2rpx solid var(--line);
+  border-radius: 14rpx;
+  box-sizing: border-box;
+  position: relative;
+}
+
+.exercise-tab-card.active {
+  border-color: var(--brand-strong);
+  background: rgba(109, 220, 208, 0.06);
+}
+
+.exercise-tab-card-img {
+  width: 80rpx;
+  height: 80rpx;
+  margin-bottom: 8rpx;
+}
+
+.exercise-tab-card.active .exercise-tab-card-img {
+  filter: brightness(1.2);
+}
+
+.exercise-tab-card-label {
+  font-size: 22rpx;
+  font-weight: 600;
+  color: var(--text-muted);
+  line-height: 1.2;
+}
+
+.exercise-tab-card.active .exercise-tab-card-label {
+  color: var(--brand-strong);
+}
+
+.exercise-tab-card-bar {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 40rpx;
+  height: 4rpx;
+  background: var(--brand-strong);
+  border-radius: 2rpx;
+}
+
 .exercise-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);

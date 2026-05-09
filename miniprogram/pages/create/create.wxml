@@ -38,37 +38,42 @@
   <!-- 训练动作 -->
   <view class="form-block">
     <view class="field-label">训练动作</view>
-    <view class="exercise-card">
-      <view class="exercise-card-thumb">
-        <view class="exercise-card-thumb-placeholder">
-          <text class="exercise-card-initial">{{selectedExerciseInitial}}</text>
-        </view>
-      </view>
+    <view class="exercise-card" bindtap="openExercisePicker">
       <view class="exercise-card-body">
         <text class="exercise-card-name">{{selectedExerciseName}}</text>
-        <view class="one-rm-inline">
-          <van-tag plain color="var(--brand-strong)">1RM</van-tag>
-          <text wx:if="{{selectedOneRepMax > 0}}" class="one-rm-value">{{selectedOneRepMax}} kg</text>
-          <text wx:else class="one-rm-empty">未设置</text>
+        <view class="exercise-card-bottom">
+          <view class="one-rm-inline">
+            <van-tag plain color="var(--brand-strong)">1RM</van-tag>
+            <text wx:if="{{selectedOneRepMax > 0}}" class="one-rm-value">{{selectedOneRepMax}} kg</text>
+            <text wx:else class="one-rm-empty">未设置</text>
+          </view>
+          <view class="exercise-pick-btn">
+            <text>选择动作</text>
+            <van-icon name="arrow" size="24rpx" color="var(--brand-strong)" />
+          </view>
         </view>
       </view>
-      <view class="ghost-button exercise-choose-btn" bindtap="openExercisePicker">选择动作 ›</view>
+      <image wx:if="{{selectedExerciseImage}}" class="exercise-card-img" src="{{selectedExerciseImage}}" mode="aspectFit" />
     </view>
-    <!-- 1RM 编辑 & 动作详情 -->
-    <view class="exercise-meta-row">
-      <view class="exercise-meta-card" bindtap="editOneRepMax">
-        <text class="exercise-meta-label">1RM 重量</text>
-        <view class="exercise-meta-body">
-          <text class="exercise-meta-value">{{selectedOneRepMax > 0 ? selectedOneRepMax : '--'}}</text>
-          <text class="exercise-meta-unit">kg</text>
-          <view class="ghost-button">修改</view>
+    <!-- 1RM 重量 + 动作详情 -->
+    <view class="exercise-info-row">
+      <view class="exercise-info-card" bindtap="editOneRepMax">
+        <text class="exercise-info-title">1RM 重量</text>
+        <view class="exercise-info-body">
+          <view class="orm-display">
+            <text class="orm-value">{{selectedOneRepMax > 0 ? selectedOneRepMax : '--'}}</text>
+            <text class="orm-unit">kg</text>
+          </view>
+          <view class="orm-edit-btn">
+            <text>修改</text>
+          </view>
         </view>
       </view>
-      <view class="exercise-meta-card" bindtap="openExerciseDetail">
-        <text class="exercise-meta-label">动作详情</text>
-        <view class="exercise-meta-body">
-          <text class="exercise-meta-hint">目标肌群 · 器械 · 要点</text>
-          <van-icon name="arrow" size="28rpx" color="var(--text-muted)" />
+      <view class="exercise-info-card" bindtap="openExerciseDetail">
+        <text class="exercise-info-title">动作详情</text>
+        <view class="exercise-info-body">
+          <text class="exercise-info-desc">目标肌群 · 器械 · 要点</text>
+          <van-icon name="arrow" size="32rpx" color="var(--text-muted)" />
         </view>
       </view>
     </view>
@@ -142,17 +147,19 @@
   <view class="exercise-sheet-inner">
     <view class="sheet-handle"></view>
     <view class="sheet-title">选择训练动作</view>
-    <scroll-view scroll-x="{{true}}" enhanced="{{true}}" show-scrollbar="{{false}}" class="exercise-tabs">
+    <view class="exercise-tabs-grid">
       <view
         wx:for="{{exerciseGroups}}"
         wx:key="id"
-        class="exercise-tab {{activeGroupId === item.id ? 'active' : ''}}"
+        class="exercise-tab-card {{activeGroupId === item.id ? 'active' : ''}}"
         data-id="{{item.id}}"
         bindtap="switchExerciseGroup"
       >
-        {{item.label}}
+        <image class="exercise-tab-card-img" src="{{item.imageUrl}}" mode="aspectFit" />
+        <text class="exercise-tab-card-label">{{item.label}}</text>
+        <view wx:if="{{activeGroupId === item.id}}" class="exercise-tab-card-bar"></view>
       </view>
-    </scroll-view>
+    </view>
     <scroll-view scroll-y="{{true}}" enhanced="{{true}}" class="exercise-scroll">
       <block wx:for="{{exerciseGroups}}" wx:key="id" wx:for-item="group">
         <view wx:if="{{activeGroupId === group.id}}" class="exercise-grid">

@@ -17,18 +17,20 @@ export type MuscleGroup = 'chest' | 'legs' | 'back' | 'shoulders' | 'arms' | 'co
 
 export interface MuscleGroupDefinition {
   id: MuscleGroup
-  /** 中文短标签（一字优先，方便 tab 显示） */
+  /** 中文短标签 */
   label: string
+  /** 分组配图路径 */
+  imageUrl: string
 }
 
 /** 分组顺序与展示顺序。 */
 export const MUSCLE_GROUPS: MuscleGroupDefinition[] = [
-  { id: 'chest', label: '胸' },
-  { id: 'legs', label: '腿' },
-  { id: 'back', label: '背' },
-  { id: 'shoulders', label: '肩' },
-  { id: 'arms', label: '手臂' },
-  { id: 'core', label: '核心' },
+  { id: 'back', label: '背部', imageUrl: '/assets/img/action/back.png' },
+  { id: 'chest', label: '胸部', imageUrl: '/assets/img/action/bench.png' },
+  { id: 'legs', label: '腿部', imageUrl: '/assets/img/action/squat.png' },
+  { id: 'shoulders', label: '肩部', imageUrl: '/assets/img/action/shoulder.png' },
+  { id: 'arms', label: '手臂', imageUrl: '/assets/img/action/arm.png' },
+  { id: 'core', label: '核心', imageUrl: '/assets/img/action/core.png' },
 ]
 
 export interface ExerciseDefinition {

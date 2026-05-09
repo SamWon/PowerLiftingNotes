@@ -38,6 +38,7 @@ interface ExerciseDetailView {
 interface ExerciseGroupView {
   id: MuscleGroup
   label: string
+  imageUrl: string
   cards: ExerciseCard[]
 }
 
@@ -56,6 +57,7 @@ const buildExerciseGroups = (): ExerciseGroupView[] => {
     .map(group => ({
       id: group.id,
       label: group.label,
+      imageUrl: group.imageUrl,
       cards: EXERCISE_CATALOG.filter(def => def.muscleGroup === group.id).map(toCard),
     }))
     .filter(view => view.cards.length > 0)
@@ -68,6 +70,16 @@ const resolveGroupOfExercise = (name: string, groups: ExerciseGroupView[]): Musc
     return def.muscleGroup
   }
   return (groups[0] ? groups[0].id : undefined) || 'chest'
+}
+
+/** 根据动作名称获取其所属肌群分组的配图。 */
+const getExerciseGroupImage = (name: string): string => {
+  const def = getExerciseDefinition(name)
+  if (def) {
+    const group = MUSCLE_GROUPS.find(g => g.id === def.muscleGroup)
+    return group ? group.imageUrl : ''
+  }
+  return ''
 }
 
 /** 把 1RM × 百分比按 0.5kg 精度换算成 kg，便于杠铃配重。 */
@@ -112,25 +124,48 @@ const toDetailView = (name: string): ExerciseDetailView => {
   }
 }
 
+interface CreatePageData {
+  exercises: string[]
+  exerciseGroups: ExerciseGroupView[]
+  activeGroupId: MuscleGroup
+  exercisePickerVisible: boolean
+  exerciseDetailVisible: boolean
+  selectedExerciseDetail: ExerciseDetailView
+  selectedExerciseName: string
+  selectedExerciseInitial: string
+  selectedExerciseImage: string
+  selectedOneRepMax: number
+  oneRepMaxMap: OneRepMaxMap
+  draftSets: DraftSet[]
+  todayText: string
+  currentDate: string
+  editingRecordId: string
+  isEditing: boolean
+  note: string
+}
+
+const INITIAL_DATA: CreatePageData = {
+  exercises: DEFAULT_EXERCISES,
+  exerciseGroups: INITIAL_GROUPS,
+  activeGroupId: resolveGroupOfExercise(DEFAULT_EXERCISES[0], INITIAL_GROUPS),
+  exercisePickerVisible: false,
+  exerciseDetailVisible: false,
+  selectedExerciseDetail: toDetailView(DEFAULT_EXERCISES[0]),
+  selectedExerciseName: DEFAULT_EXERCISES[0],
+  selectedExerciseInitial: DEFAULT_EXERCISES[0].charAt(0) || '?',
+  selectedExerciseImage: getExerciseGroupImage(DEFAULT_EXERCISES[0]),
+  selectedOneRepMax: 0,
+  oneRepMaxMap: {},
+  draftSets: [createDefaultSet()],
+  todayText: toDateText(new Date()),
+  currentDate: toDateText(new Date()),
+  editingRecordId: '',
+  isEditing: false,
+  note: '',
+}
+
 Component({
-  data: {
-    exercises: DEFAULT_EXERCISES as string[],
-    exerciseGroups: INITIAL_GROUPS as ExerciseGroupView[],
-    activeGroupId: resolveGroupOfExercise(DEFAULT_EXERCISES[0], INITIAL_GROUPS) as MuscleGroup,
-    exercisePickerVisible: false,
-    exerciseDetailVisible: false,
-    selectedExerciseDetail: toDetailView(DEFAULT_EXERCISES[0]) as ExerciseDetailView,
-    selectedExerciseName: DEFAULT_EXERCISES[0],
-    selectedExerciseInitial: DEFAULT_EXERCISES[0].charAt(0) || '?',
-    selectedOneRepMax: 0,
-    oneRepMaxMap: {} as OneRepMaxMap,
-    draftSets: [createDefaultSet()] as DraftSet[],
-    todayText: toDateText(new Date()),
-    currentDate: toDateText(new Date()),
-    editingRecordId: '' as string,
-    isEditing: false,
-    note: '' as string,
-  },
+  data: INITIAL_DATA,
   lifetimes: {
     attached() {
       this.loadExerciseData()
@@ -158,6 +193,7 @@ Component({
         activeGroupId: resolveGroupOfExercise(selected, exerciseGroups),
         selectedExerciseName: selected,
         selectedExerciseInitial: selected.charAt(0) || '?',
+        selectedExerciseImage: getExerciseGroupImage(selected),
         selectedExerciseDetail: toDetailView(selected),
         oneRepMaxMap,
         selectedOneRepMax: oneRepMaxMap[selected] || 0,
@@ -188,6 +224,7 @@ Component({
         currentDate: record.date,
         selectedExerciseName: firstName,
         selectedExerciseInitial: firstName.charAt(0) || '?',
+        selectedExerciseImage: getExerciseGroupImage(firstName),
         selectedExerciseDetail: toDetailView(firstName),
         selectedOneRepMax: firstOneRepMax,
         draftSets,
@@ -240,6 +277,7 @@ Component({
       this.setData({
         selectedExerciseName,
         selectedExerciseInitial: selectedExerciseName.charAt(0) || '?',
+        selectedExerciseImage: getExerciseGroupImage(selectedExerciseName),
         selectedOneRepMax: oneRepMax,
         selectedExerciseDetail: toDetailView(selectedExerciseName),
         exercisePickerVisible: false,
@@ -363,7 +401,7 @@ Component({
       this.setData({ draftSets: this.data.draftSets.filter((_, setIndex) => setIndex !== index) })
     },
     /** 把当前草稿组组装成 TrainingExercise，校验失败返回 null 并提示。 */
-    collectCurrentExercise(): TrainingExercise | null {
+    collectCurrentExercise() {
       if (!this.data.selectedExerciseName) {
         wx.showToast({ title: '请选择动作', icon: 'none' })
         return null
