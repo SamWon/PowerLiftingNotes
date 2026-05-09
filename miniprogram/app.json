@@ -5,6 +5,13 @@
     "pages/about/about",
     "pages/logs/logs"
   ],
+  "usingComponents": {
+    "van-icon": "@vant/weapp/icon/index",
+    "van-popup": "@vant/weapp/popup/index",
+    "van-tag": "@vant/weapp/tag/index",
+    "van-overlay": "@vant/weapp/overlay/index",
+    "van-transition": "@vant/weapp/transition/index"
+  },
   "window": {
     "navigationBarTextStyle": "white",
     "navigationStyle": "custom",
@@ -19,15 +26,21 @@
     "list": [
       {
         "pagePath": "pages/index/index",
-        "text": "记录"
+        "text": "记录",
+        "iconPath": "assets/icon/record.png",
+        "selectedIconPath": "assets/icon/record-active.png"
       },
       {
         "pagePath": "pages/create/create",
-        "text": "新建"
+        "text": "新建",
+        "iconPath": "assets/icon/create.png",
+        "selectedIconPath": "assets/icon/create-active.png"
       },
       {
         "pagePath": "pages/about/about",
-        "text": "关于"
+        "text": "关于",
+        "iconPath": "assets/icon/about.png",
+        "selectedIconPath": "assets/icon/about-active.png"
       }
     ]
   },

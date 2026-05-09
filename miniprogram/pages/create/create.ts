@@ -21,10 +21,18 @@ import {
 
 interface ExerciseCard {
   name: string
-  description: string
+  shortDesc: string
   imageUrl: string
   /** 当 imageUrl 缺失时，用作占位图的中文首字。 */
   initial: string
+}
+
+interface ExerciseDetailView {
+  name: string
+  description: string
+  targetMuscles: string[]
+  equipment: string
+  techniqueTips: string[]
 }
 
 interface ExerciseGroupView {
@@ -37,7 +45,7 @@ const EDITING_KEY = 'powerlifting_editing_record_id'
 
 const toCard = (def: ExerciseDefinition): ExerciseCard => ({
   name: def.name,
-  description: def.description || '',
+  shortDesc: def.shortDesc || '',
   imageUrl: def.imageUrl || '',
   initial: def.name.charAt(0) || '?',
 })
@@ -92,13 +100,28 @@ const setToDraft = (set: TrainingSet, oneRepMax: number): DraftSet => {
 
 const INITIAL_GROUPS = buildExerciseGroups()
 
+/** 根据动作名称构建详情视图。 */
+const toDetailView = (name: string): ExerciseDetailView => {
+  const def = getExerciseDefinition(name)
+  return {
+    name,
+    description: (def && def.description) || '',
+    targetMuscles: ((def && def.targetMuscles) || '').split('、').filter(Boolean),
+    equipment: (def && def.equipment) || '',
+    techniqueTips: (def && def.techniqueTips) || [],
+  }
+}
+
 Component({
   data: {
     exercises: DEFAULT_EXERCISES as string[],
     exerciseGroups: INITIAL_GROUPS as ExerciseGroupView[],
     activeGroupId: resolveGroupOfExercise(DEFAULT_EXERCISES[0], INITIAL_GROUPS) as MuscleGroup,
     exercisePickerVisible: false,
+    exerciseDetailVisible: false,
+    selectedExerciseDetail: toDetailView(DEFAULT_EXERCISES[0]) as ExerciseDetailView,
     selectedExerciseName: DEFAULT_EXERCISES[0],
+    selectedExerciseInitial: DEFAULT_EXERCISES[0].charAt(0) || '?',
     selectedOneRepMax: 0,
     oneRepMaxMap: {} as OneRepMaxMap,
     draftSets: [createDefaultSet()] as DraftSet[],
@@ -134,6 +157,8 @@ Component({
         exerciseGroups,
         activeGroupId: resolveGroupOfExercise(selected, exerciseGroups),
         selectedExerciseName: selected,
+        selectedExerciseInitial: selected.charAt(0) || '?',
+        selectedExerciseDetail: toDetailView(selected),
         oneRepMaxMap,
         selectedOneRepMax: oneRepMaxMap[selected] || 0,
       })
@@ -162,6 +187,8 @@ Component({
         isEditing: true,
         currentDate: record.date,
         selectedExerciseName: firstName,
+        selectedExerciseInitial: firstName.charAt(0) || '?',
+        selectedExerciseDetail: toDetailView(firstName),
         selectedOneRepMax: firstOneRepMax,
         draftSets,
         note: record.note || '',
@@ -187,9 +214,12 @@ Component({
     },
     openExercisePicker() {
       // 打开时把 tab 切到当前选中动作所属的分组，避免用户找不到当前动作。
+      // 同时重建 exerciseGroups，确保第二次及以后打开时 wx:for 能正确渲染。
+      const exerciseGroups = buildExerciseGroups()
       this.setData({
+        exerciseGroups,
         exercisePickerVisible: true,
-        activeGroupId: resolveGroupOfExercise(this.data.selectedExerciseName, this.data.exerciseGroups),
+        activeGroupId: resolveGroupOfExercise(this.data.selectedExerciseName, exerciseGroups),
       })
     },
     closeExercisePicker() {
@@ -209,10 +239,18 @@ Component({
           )
       this.setData({
         selectedExerciseName,
+        selectedExerciseInitial: selectedExerciseName.charAt(0) || '?',
         selectedOneRepMax: oneRepMax,
+        selectedExerciseDetail: toDetailView(selectedExerciseName),
         exercisePickerVisible: false,
         draftSets,
       })
+    },
+    openExerciseDetail() {
+      this.setData({ exerciseDetailVisible: true })
+    },
+    closeExerciseDetail() {
+      this.setData({ exerciseDetailVisible: false })
     },
     editOneRepMax() {
       const name = this.data.selectedExerciseName
@@ -403,9 +441,6 @@ Component({
       })
       wx.showToast({ title: wasEditing ? '已更新' : '已保存', icon: 'success' })
       wx.switchTab({ url: '/pages/index/index' })
-    },
-    noop() {
-      return
     },
   },
 })

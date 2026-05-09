@@ -8,6 +8,10 @@
   "license": "",
   "devDependencies": {
     "miniprogram-api-typings": "^2.8.3-1",
+    "sharp": "^0.34.5",
     "typescript": "^5.4.5"
+  },
+  "dependencies": {
+    "@vant/weapp": "^1.11.7"
   }
 }
