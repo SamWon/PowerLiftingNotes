@@ -1,0 +1,116 @@
+<navigation-bar title="SBD 进展" back="{{false}}"></navigation-bar>
+
+<view class="page-shell sbd-page">
+  <view class="hero">
+    <view class="eyebrow">SBD Top Sets</view>
+    <view class="title">Top 组重量变化</view>
+    <view class="subtitle">追踪三大项的 1RM 尝试，看见进步的轨迹。</view>
+  </view>
+
+  <!-- 训练动作 -->
+  <view class="form-block">
+    <view class="field-label">训练动作</view>
+    <view class="exercise-card" bindtap="openPicker">
+      <view class="exercise-card-body">
+        <text class="exercise-card-name">{{selectedExerciseName}}</text>
+        <view class="exercise-card-bottom">
+          <view class="one-rm-inline">
+            <van-tag plain color="var(--brand-strong)">SBD</van-tag>
+            <text wx:if="{{selectedExerciseDesc}}" class="one-rm-empty">{{selectedExerciseDesc}}</text>
+          </view>
+          <view class="exercise-pick-btn">
+            <text>选择动作</text>
+            <van-icon name="arrow" size="24rpx" color="var(--brand-strong)" />
+          </view>
+        </view>
+      </view>
+      <image wx:if="{{selectedExerciseImage}}" class="exercise-card-img" src="{{selectedExerciseImage}}" mode="aspectFit" />
+    </view>
+  </view>
+
+  <!-- 时间范围 -->
+  <view class="form-block">
+    <view class="field-row">
+      <view class="field-label" style="margin-bottom:0">时间范围</view>
+      <view class="switcher range-switcher">
+        <view
+          wx:for="{{rangeOptions}}"
+          wx:key="id"
+          class="switch {{activeRangeId === item.id ? 'active' : ''}}"
+          data-id="{{item.id}}"
+          bindtap="switchRange"
+        >{{item.label}}</view>
+      </view>
+    </view>
+
+    <!-- 摘要 -->
+    <view class="sbd-stat-row">
+      <view class="sbd-stat-item">
+        <text class="sbd-stat-number">{{pointCount}}</text>
+        <text class="sbd-stat-label">Top 组次数</text>
+      </view>
+      <view class="sbd-stat-item">
+        <text class="sbd-stat-number">{{maxWeight > 0 ? maxWeight : '--'}}</text>
+        <text class="sbd-stat-label">区间最高 (kg)</text>
+      </view>
+      <view class="sbd-stat-item">
+        <text class="sbd-stat-number">{{latestWeight > 0 ? latestWeight : '--'}}</text>
+        <text class="sbd-stat-label">最近一次 (kg)</text>
+      </view>
+    </view>
+
+    <!-- 折线图 -->
+    <view class="chart-wrap">
+      <canvas wx:if="{{!pickerVisible}}" id="sbd-chart" type="2d" class="sbd-chart"></canvas>
+      <view wx:else class="sbd-chart"></view>
+    </view>
+    <view class="chart-caption">仅统计 1 次（Top 组）的重量，按训练日期排序。</view>
+  </view>
+
+  <!-- 数据列表 -->
+  <view class="form-block">
+    <view class="field-label">明细 · 近 {{rangeLabel}}</view>
+    <view wx:if="{{chartPoints.length === 0}}" class="empty-line">该时间范围内没有 1 次的 Top 组记录。</view>
+    <view wx:else class="sbd-point-list">
+      <view wx:for="{{chartPoints}}" wx:key="date" class="sbd-point-row">
+        <text class="sbd-point-date">{{item.date}}</text>
+        <text class="sbd-point-weight">{{item.weight}} kg</text>
+      </view>
+    </view>
+  </view>
+</view>
+
+<!-- 动作选择弹窗 -->
+<van-popup
+  wx:if="{{pickerVisible}}"
+  show="{{pickerVisible}}"
+  position="bottom"
+  round
+  custom-style="background: var(--surface); max-height: 72vh;"
+  bind:close="closePicker"
+>
+  <view class="exercise-sheet-inner">
+    <view class="sheet-handle"></view>
+    <view class="sheet-title">选择训练动作</view>
+    <scroll-view scroll-y="{{true}}" enhanced="{{true}}" class="exercise-scroll">
+      <view class="exercise-grid">
+        <view
+          wx:for="{{exerciseCards}}"
+          wx:key="name"
+          class="exercise-option {{selectedExerciseName === item.name ? 'active' : ''}}"
+          data-name="{{item.name}}"
+          bindtap="chooseExercise"
+        >
+          <view class="exercise-thumb">
+            <image wx:if="{{item.imageUrl}}" src="{{item.imageUrl}}" mode="aspectFill" class="exercise-thumb-img" />
+            <view wx:else class="exercise-thumb-fallback">
+              <text class="exercise-thumb-initial">{{item.initial}}</text>
+            </view>
+          </view>
+          <view class="exercise-option-name">{{item.name}}</view>
+          <view wx:if="{{item.shortDesc}}" class="exercise-option-desc">{{item.shortDesc}}</view>
+        </view>
+      </view>
+    </scroll-view>
+  </view>
+</van-popup>

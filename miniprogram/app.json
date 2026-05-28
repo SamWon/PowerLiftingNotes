@@ -2,6 +2,7 @@
   "pages": [
     "pages/index/index",
     "pages/create/create",
+    "pages/sbd/sbd",
     "pages/about/about",
     "pages/logs/logs"
   ],
@@ -35,6 +36,12 @@
         "text": "新建",
         "iconPath": "assets/icon/create.png",
         "selectedIconPath": "assets/icon/create-active.png"
+      },
+      {
+        "pagePath": "pages/sbd/sbd",
+        "text": "SBD",
+        "iconPath": "assets/icon/sbd.png",
+        "selectedIconPath": "assets/icon/sbd-active.png"
       },
       {
         "pagePath": "pages/about/about",

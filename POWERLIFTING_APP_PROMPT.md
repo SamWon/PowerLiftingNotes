@@ -18,7 +18,7 @@
 - 避免营销式落地页，打开后直接进入可用的训练记录体验。
 - 交互控件需要稳定、易点按，适配手机屏幕。
 - 颜色 / 表面 / 间距统一通过 `miniprogram/styles/theme.less` 的 CSS 变量与 `miniprogram/utils/theme.ts` 的 `themeColors` 维护，禁止裸色值。
-- 图标统一放在 `miniprogram/assets/icon/` 目录下，SVG 源文件通过 `generate-icons.js` 生成 PNG（仅供 tabBar 使用）。tabBar 图标名称约定：`record` / `create` / `about`（+ `-active` 后缀为选中态）。
+- 图标统一放在 `miniprogram/assets/icon/` 目录下，SVG 源文件通过 `generate-icons.js` 生成 PNG（仅供 tabBar 使用）。tabBar 图标名称约定：`record` / `create` / `sbd` / `about`（+ `-active` 后缀为选中态）。
 - 页面内图标统一使用 **Vant Weapp** (`@vant/weapp`) 的 `van-icon` 组件，不再使用自定义 PNG。常用图标名：`calendar-o`（日期）、`delete-o`（删除）、`records`（保存）、`arrow`（箭头）、`arrow-down`（下拉）、`plus`（添加）。
 - 弹窗 / 底部面板使用 `van-popup`（position="bottom"、round）替代自定义 `sheet-mask`。
 - 标签使用 `van-tag`（如 1RM 标签）。
@@ -90,6 +90,22 @@
   - 导入成功后**直接覆盖**当前本地训练记录。
   - 因为导入会覆盖数据，执行导入前必须 `wx.showModal` 弹窗提醒用户确认。
   - 导入兼容旧版本（缺失 `weight` 字段时按 0 兜底）以及"裸 `TrainingRecord[]`"格式。
+
+### 7. SBD 进展页（tabBar，位于"新建"与"关于"之间）
+
+- 用于展示用户某个三大项动作 **Top 组重量**随时间的变化趋势。
+- "Top 组"定义：当天该动作中 `reps === 1` 的训练组里 **重量最高的一组**（取唯一一个值；当天没有 1 次组则视为没有数据）。
+- 可选动作严格限定为：`卧推`、`深蹲`、`低杠深蹲`、`传统硬拉`、`相扑硬拉`。其他动作不会出现在选择弹窗中。
+  - 动作选择**复用 create 页的弹窗风格**（`van-popup` + `exercise-grid` + `exercise-option`），但去掉肌群分组 tab，仅展示这 5 个动作的单层网格。
+- 时间范围切换：`2 年` / `1 年` / `半年`，默认 `1 年`。
+  - 切换时间或动作后图表立即重绘，无需手动刷新。
+- 折线图：
+  - 使用原生 `<canvas type="2d">` 渲染，主色为 `themeColors.brandStrong`，下方渐变半透明色块。
+  - 当数据点 ≥ 2 个时绘制折线；只有 1 个数据点时仅画点；0 个数据点时图区中央显示"暂无 Top 组数据"。
+  - Y 轴自动按数据上下扩 15% 留白，刻度 4 段；X 轴标签自动疏化（首、中、尾）。
+- 顶部展示三个统计：区间内 Top 组次数、区间最高重量、最近一次重量。
+- 图表下方给出明细列表（日期 + 重量），按日期升序。
+- 数据均来自 `loadTrainingRecords()`，不引入新的存储 key。
 
 ## 数据模型与本地存储
 
