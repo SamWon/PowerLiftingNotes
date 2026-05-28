@@ -136,55 +136,16 @@
 </view>
 
 <!-- 动作选择弹窗 -->
-<van-popup
-  wx:if="{{exercisePickerVisible}}"
+<exercise-picker
   show="{{exercisePickerVisible}}"
-  position="bottom"
-  round
-  custom-style="background: var(--surface); height: 72vh;"
+  mode="grouped"
+  selectedName="{{selectedExerciseName}}"
+  exerciseGroups="{{exerciseGroups}}"
+  activeGroupId="{{activeGroupId}}"
   bind:close="closeExercisePicker"
->
-  <view class="exercise-sheet-inner">
-    <view class="sheet-handle"></view>
-    <view class="sheet-title">选择训练动作</view>
-    <view class="exercise-tabs-grid">
-      <view
-        wx:for="{{exerciseGroups}}"
-        wx:key="id"
-        class="exercise-tab-card {{activeGroupId === item.id ? 'active' : ''}}"
-        data-id="{{item.id}}"
-        bindtap="switchExerciseGroup"
-      >
-        <image class="exercise-tab-card-img" src="{{item.imageUrl}}" mode="aspectFit" />
-        <text class="exercise-tab-card-label">{{item.label}}</text>
-        <view wx:if="{{activeGroupId === item.id}}" class="exercise-tab-card-bar"></view>
-      </view>
-    </view>
-    <scroll-view scroll-y="{{true}}" enhanced="{{true}}" class="exercise-scroll">
-      <block wx:for="{{exerciseGroups}}" wx:key="id" wx:for-item="group">
-        <view wx:if="{{activeGroupId === group.id}}" class="exercise-grid">
-          <view
-            wx:for="{{group.cards}}"
-            wx:key="name"
-            wx:for-item="item"
-            class="exercise-option {{selectedExerciseName === item.name ? 'active' : ''}}"
-            data-name="{{item.name}}"
-            bindtap="chooseExercise"
-          >
-            <view class="exercise-thumb">
-              <image wx:if="{{item.imageUrl}}" src="{{item.imageUrl}}" mode="aspectFill" class="exercise-thumb-img" />
-              <view wx:else class="exercise-thumb-fallback">
-                <text class="exercise-thumb-initial">{{item.initial}}</text>
-              </view>
-            </view>
-            <view class="exercise-option-name">{{item.name}}</view>
-            <view wx:if="{{item.shortDesc}}" class="exercise-option-desc">{{item.shortDesc}}</view>
-          </view>
-        </view>
-      </block>
-    </scroll-view>
-  </view>
-</van-popup>
+  bind:select="chooseExercise"
+  bind:switchgroup="switchExerciseGroup"
+/>
 
 <!-- 动作详情弹窗 -->
 <van-popup

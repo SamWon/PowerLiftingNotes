@@ -10,6 +10,7 @@ export * from './storage'
 export * from './import-export'
 export * from './migration'
 export * from './dev-switch'
+export * from './exercise-ui'
 
 // 便于直接获取动作目录
 export {

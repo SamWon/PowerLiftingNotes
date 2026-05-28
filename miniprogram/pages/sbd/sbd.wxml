@@ -81,36 +81,11 @@
 </view>
 
 <!-- 动作选择弹窗 -->
-<van-popup
-  wx:if="{{pickerVisible}}"
+<exercise-picker
   show="{{pickerVisible}}"
-  position="bottom"
-  round
-  custom-style="background: var(--surface); max-height: 72vh;"
+  mode="flat"
+  selectedName="{{selectedExerciseName}}"
+  exerciseCards="{{exerciseCards}}"
   bind:close="closePicker"
->
-  <view class="exercise-sheet-inner">
-    <view class="sheet-handle"></view>
-    <view class="sheet-title">选择训练动作</view>
-    <scroll-view scroll-y="{{true}}" enhanced="{{true}}" class="exercise-scroll">
-      <view class="exercise-grid">
-        <view
-          wx:for="{{exerciseCards}}"
-          wx:key="name"
-          class="exercise-option {{selectedExerciseName === item.name ? 'active' : ''}}"
-          data-name="{{item.name}}"
-          bindtap="chooseExercise"
-        >
-          <view class="exercise-thumb">
-            <image wx:if="{{item.imageUrl}}" src="{{item.imageUrl}}" mode="aspectFill" class="exercise-thumb-img" />
-            <view wx:else class="exercise-thumb-fallback">
-              <text class="exercise-thumb-initial">{{item.initial}}</text>
-            </view>
-          </view>
-          <view class="exercise-option-name">{{item.name}}</view>
-          <view wx:if="{{item.shortDesc}}" class="exercise-option-desc">{{item.shortDesc}}</view>
-        </view>
-      </view>
-    </scroll-view>
-  </view>
-</van-popup>
+  bind:select="chooseExercise"
+/>

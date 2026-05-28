@@ -1,6 +1,7 @@
 {
   "usingComponents": {
     "navigation-bar": "/components/navigation-bar/navigation-bar",
+    "exercise-picker": "/components/exercise-picker/exercise-picker",
     "van-icon": "@vant/weapp/icon/index",
     "van-popup": "@vant/weapp/popup/index",
     "van-tag": "@vant/weapp/tag/index"

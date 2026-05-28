@@ -1,31 +1,25 @@
 import {
   DEFAULT_EXERCISES,
   DraftSet,
-  EXERCISE_CATALOG,
-  ExerciseDefinition,
-  MUSCLE_GROUPS,
+  ExerciseCard,
+  ExerciseGroupView,
   MuscleGroup,
   OneRepMaxMap,
   TrainingExercise,
   TrainingRecord,
   TrainingSet,
+  buildExerciseGroups,
   createDefaultSet,
   getExerciseDefinition,
+  getExerciseGroupImage,
   loadOneRepMaxMap,
   loadTrainingRecords,
   mergeExercises,
+  resolveGroupOfExercise,
   saveOneRepMaxMap,
   saveTrainingRecords,
   toDateText,
 } from '../../utils/training/index'
-
-interface ExerciseCard {
-  name: string
-  shortDesc: string
-  imageUrl: string
-  /** 当 imageUrl 缺失时，用作占位图的中文首字。 */
-  initial: string
-}
 
 interface ExerciseDetailView {
   name: string
@@ -35,52 +29,7 @@ interface ExerciseDetailView {
   techniqueTips: string[]
 }
 
-interface ExerciseGroupView {
-  id: MuscleGroup
-  label: string
-  imageUrl: string
-  cards: ExerciseCard[]
-}
-
 const EDITING_KEY = 'powerlifting_editing_record_id'
-
-const toCard = (def: ExerciseDefinition): ExerciseCard => ({
-  name: def.name,
-  shortDesc: def.shortDesc || '',
-  imageUrl: def.imageUrl || '',
-  initial: def.name.charAt(0) || '?',
-})
-
-/** 按分组生成动作卡片列表（仅包含该分组下有动作的组）。 */
-const buildExerciseGroups = (): ExerciseGroupView[] => {
-  return MUSCLE_GROUPS
-    .map(group => ({
-      id: group.id,
-      label: group.label,
-      imageUrl: group.imageUrl,
-      cards: EXERCISE_CATALOG.filter(def => def.muscleGroup === group.id).map(toCard),
-    }))
-    .filter(view => view.cards.length > 0)
-}
-
-/** 根据动作名称推断它属于哪个分组（找不到时返回第一个分组）。 */
-const resolveGroupOfExercise = (name: string, groups: ExerciseGroupView[]): MuscleGroup => {
-  const def = getExerciseDefinition(name)
-  if (def) {
-    return def.muscleGroup
-  }
-  return (groups[0] ? groups[0].id : undefined) || 'chest'
-}
-
-/** 根据动作名称获取其所属肌群分组的配图。 */
-const getExerciseGroupImage = (name: string): string => {
-  const def = getExerciseDefinition(name)
-  if (def) {
-    const group = MUSCLE_GROUPS.find(g => g.id === def.muscleGroup)
-    return group ? group.imageUrl : ''
-  }
-  return ''
-}
 
 /** 把 1RM × 百分比按 0.5kg 精度换算成 kg，便于杠铃配重。 */
 const computeWeightFromPercent = (oneRepMax: number, percent: number) => {
@@ -263,11 +212,11 @@ Component({
       this.setData({ exercisePickerVisible: false })
     },
     switchExerciseGroup(event: any) {
-      const activeGroupId = event.currentTarget.dataset.id as MuscleGroup
+      const activeGroupId = event.detail.id as MuscleGroup
       this.setData({ activeGroupId })
     },
     chooseExercise(event: any) {
-      const selectedExerciseName = event.currentTarget.dataset.name as string
+      const selectedExerciseName = event.detail.name as string
       const oneRepMax = this.data.oneRepMaxMap[selectedExerciseName] || 0
       const draftSets = oneRepMax > 0
         ? this.data.draftSets

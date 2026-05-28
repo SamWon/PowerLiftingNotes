@@ -1,9 +1,11 @@
 import {
   EXERCISE_CATALOG,
-  ExerciseDefinition,
+  ExerciseCard,
   TrainingRecord,
   getExerciseDefinition,
+  getExerciseGroupImage,
   loadTrainingRecords,
+  toExerciseCard,
 } from '../../utils/training/index'
 import { themeColors } from '../../utils/theme'
 
@@ -25,13 +27,6 @@ const RANGE_OPTIONS: RangeOption[] = [
   { id: 'half', label: '半年', months: 6 },
 ]
 
-interface ExerciseCard {
-  name: string
-  shortDesc: string
-  imageUrl: string
-  initial: string
-}
-
 interface TopSetPoint {
   date: string
   weight: number
@@ -43,20 +38,13 @@ interface ChartPointView {
   weight: number
 }
 
-const toCard = (def: ExerciseDefinition): ExerciseCard => ({
-  name: def.name,
-  shortDesc: def.shortDesc || '',
-  imageUrl: def.imageUrl || '',
-  initial: def.name.charAt(0) || '?',
-})
-
 /** 构建 SBD 页可选动作卡片（按 SBD_EXERCISE_NAMES 中的顺序）。 */
 const buildSbdCards = (): ExerciseCard[] => {
   const cards: ExerciseCard[] = []
   SBD_EXERCISE_NAMES.forEach((name) => {
     const def = EXERCISE_CATALOG.find((d) => d.name === name)
     if (def) {
-      cards.push(toCard(def))
+      cards.push(toExerciseCard(def))
     } else {
       cards.push({ name, shortDesc: '', imageUrl: '', initial: name.charAt(0) || '?' })
     }
@@ -174,7 +162,7 @@ const INITIAL_DATA: SbdPageData = {
   exerciseCards: INITIAL_CARDS,
   selectedExerciseName: DEFAULT_EXERCISE,
   selectedExerciseInitial: DEFAULT_EXERCISE.charAt(0) || '?',
-  selectedExerciseImage: (getExerciseDefinition(DEFAULT_EXERCISE) || { imageUrl: '' }).imageUrl || '',
+  selectedExerciseImage: getExerciseGroupImage(DEFAULT_EXERCISE),
   selectedExerciseDesc: (getExerciseDefinition(DEFAULT_EXERCISE) || { shortDesc: '' }).shortDesc || '',
   pickerVisible: false,
   rangeOptions: RANGE_OPTIONS,
@@ -379,7 +367,7 @@ Component<SbdPageData, Record<string, never>, SbdMethods>({
       })
     },
     chooseExercise(event: WechatMiniprogram.CustomEvent) {
-      const name = event.currentTarget.dataset.name as string
+      const name = event.detail.name as string
       if (!name) {
         return
       }
@@ -387,7 +375,7 @@ Component<SbdPageData, Record<string, never>, SbdMethods>({
       this.setData({
         selectedExerciseName: name,
         selectedExerciseInitial: name.charAt(0) || '?',
-        selectedExerciseImage: (def && def.imageUrl) || '',
+        selectedExerciseImage: getExerciseGroupImage(name),
         selectedExerciseDesc: (def && def.shortDesc) || '',
         pickerVisible: false,
       })
