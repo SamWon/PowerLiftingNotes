@@ -1,9 +1,36 @@
-.sbd-page {
+.stats-page {
   padding-bottom: calc(132rpx + env(safe-area-inset-bottom));
 }
 
-.sbd-page .form-block {
+.stats-page .form-block {
   overflow: hidden;
+}
+
+/* ===== Top-level tab bar ===== */
+.stats-tab-bar {
+  display: flex;
+  margin: 0 0 24rpx;
+  padding: 6rpx;
+  background: var(--surface-soft);
+  border-radius: 22rpx;
+  gap: 4rpx;
+}
+
+.stats-tab {
+  flex: 1;
+  text-align: center;
+  padding: 18rpx 0;
+  color: var(--text-muted);
+  font-size: 26rpx;
+  font-weight: 600;
+  letter-spacing: 0.5rpx;
+  border-radius: 18rpx;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.stats-tab.active {
+  background: var(--brand-strong-soft);
+  color: var(--brand-strong);
 }
 
 /* ===== Exercise card (复用 create 页风格) ===== */
@@ -75,20 +102,56 @@
   --tag-plain-background-color: rgba(109, 220, 208, 0.16);
 }
 
-/* ===== Range switcher (right-aligned in field-row) ===== */
-.sbd-page .range-switcher {
+/* ===== Range / weeks switcher ===== */
+.stats-page .range-switcher {
   flex: 0 0 360rpx;
 }
 
+/* ===== Muscle group chips (volume tab) ===== */
+.group-chip-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14rpx;
+  margin-top: 16rpx;
+}
+
+.group-chip {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10rpx;
+  padding: 18rpx 12rpx;
+  background: var(--surface-soft);
+  border: 1rpx solid transparent;
+  border-radius: 18rpx;
+  color: var(--text-soft);
+  font-size: 26rpx;
+  font-weight: 600;
+  line-height: 1;
+  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+
+.group-chip.active {
+  background: var(--brand-strong-soft);
+  border-color: rgba(109, 220, 208, 0.4);
+  color: var(--brand-strong);
+}
+
+.group-chip-img {
+  width: 36rpx;
+  height: 36rpx;
+  opacity: 0.85;
+}
+
 /* ===== Stats ===== */
-.sbd-stat-row {
+.stats-stat-row {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 14rpx;
   margin-top: 24rpx;
 }
 
-.sbd-stat-item {
+.stats-stat-item {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -97,7 +160,7 @@
   border-radius: 16rpx;
 }
 
-.sbd-stat-number {
+.stats-stat-number {
   color: var(--text);
   font-size: 40rpx;
   font-weight: 800;
@@ -105,7 +168,7 @@
   line-height: 1;
 }
 
-.sbd-stat-label {
+.stats-stat-label {
   margin-top: 10rpx;
   color: var(--text-soft);
   font-size: 22rpx;
@@ -122,7 +185,7 @@
   border-radius: 16rpx;
 }
 
-.sbd-chart {
+.stats-chart {
   width: 100%;
   height: 380rpx;
 }
@@ -135,31 +198,48 @@
 }
 
 /* ===== Detail list ===== */
-.sbd-point-list {
+.section-gap {
+  margin-top: 36rpx;
+}
+
+.stats-point-list {
   margin-top: 16rpx;
   display: flex;
   flex-direction: column;
 }
 
-.sbd-point-row {
+.stats-point-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 22rpx 4rpx;
   border-bottom: 1rpx solid var(--line);
+  gap: 18rpx;
 }
 
-.sbd-point-row:last-child {
+.stats-point-row:last-child {
   border-bottom: 0;
 }
 
-.sbd-point-date {
+.stats-point-meta {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.stats-point-date {
   color: var(--text-soft);
   font-size: 28rpx;
   font-weight: 500;
 }
 
-.sbd-point-weight {
+.stats-point-sub {
+  margin-top: 4rpx;
+  color: var(--text-muted);
+  font-size: 22rpx;
+}
+
+.stats-point-weight {
   color: var(--brand-strong);
   font-size: 32rpx;
   font-weight: 750;
@@ -172,4 +252,37 @@
   color: var(--text-muted);
   font-size: 26rpx;
   text-align: center;
+}
+
+/* ===== Volume summary ===== */
+.volume-summary {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 14rpx;
+  margin-top: 16rpx;
+}
+
+.volume-summary-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 22rpx 12rpx;
+  background: var(--brand-strong-soft);
+  border-radius: 16rpx;
+}
+
+.volume-summary-num {
+  color: var(--brand-strong);
+  font-size: 44rpx;
+  font-weight: 800;
+  letter-spacing: -0.4rpx;
+  line-height: 1;
+}
+
+.volume-summary-lbl {
+  margin-top: 10rpx;
+  color: var(--text-soft);
+  font-size: 22rpx;
+  font-weight: 500;
+  letter-spacing: 0.4rpx;
 }

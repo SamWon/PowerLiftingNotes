@@ -464,6 +464,271 @@ export const TEST_TRAINING_RECORDS: TrainingRecord[] = [
       },
     ],
   },
+
+  // ===== e1RM 友好数据：rep PR =====
+  // 用 5 次 / 3 次 PR 触发 e1RM 折线上扬，验证 e1RM 视图。
+
+  // 1 天前 — 卧推 5RM PR
+  {
+    id: uid(18),
+    date: daysAgo(1),
+    createdAt: Date.now() - 1 * 86400000,
+    note: '5 次 PR 尝试',
+    exercises: [
+      {
+        name: '卧推',
+        sets: [
+          { reps: 5, rpe: 7, weight: 95 },
+          { reps: 5, rpe: 9, weight: 102.5 },
+          { reps: 5, rpe: 10, weight: 105 },
+        ],
+      },
+    ],
+  },
+
+  // 3 天前 — 深蹲 3RM PR
+  {
+    id: uid(19),
+    date: daysAgo(3),
+    createdAt: Date.now() - 3 * 86400000,
+    exercises: [
+      {
+        name: '深蹲',
+        sets: [
+          { reps: 5, rpe: 7, weight: 140 },
+          { reps: 3, rpe: 8, weight: 160 },
+          { reps: 3, rpe: 9, weight: 165 },
+        ],
+      },
+    ],
+  },
+
+  // 6 天前 — 传统硬拉 5RM
+  {
+    id: uid(20),
+    date: daysAgo(6),
+    createdAt: Date.now() - 6 * 86400000,
+    exercises: [
+      {
+        name: '传统硬拉',
+        sets: [
+          { reps: 5, rpe: 7, weight: 160 },
+          { reps: 5, rpe: 8, weight: 175 },
+          { reps: 5, rpe: 9, weight: 185 },
+        ],
+      },
+    ],
+  },
+
+  // ===== 周容量友好数据：补齐近 8 周的训练分布 =====
+  // 让 stats 页"周容量"柱状图看起来连续递增 + 偶发减载。
+
+  // 8 天前 — 肩臂
+  {
+    id: uid(21),
+    date: daysAgo(8),
+    createdAt: Date.now() - 8 * 86400000,
+    exercises: [
+      {
+        name: '过头推举',
+        sets: [
+          { reps: 5, rpe: 7, weight: 50 },
+          { reps: 5, rpe: 8, weight: 55 },
+          { reps: 5, rpe: 8, weight: 55 },
+        ],
+      },
+      {
+        name: '高位下拉',
+        sets: [
+          { reps: 10, rpe: 7, weight: 60 },
+          { reps: 10, rpe: 8, weight: 65 },
+          { reps: 10, rpe: 8, weight: 65 },
+        ],
+      },
+    ],
+  },
+
+  // 15 天前 — 卧推中量
+  {
+    id: uid(22),
+    date: daysAgo(15),
+    createdAt: Date.now() - 15 * 86400000,
+    exercises: [
+      {
+        name: '卧推',
+        sets: [
+          { reps: 5, rpe: 7, weight: 85 },
+          { reps: 5, rpe: 8, weight: 90 },
+          { reps: 5, rpe: 8, weight: 90 },
+        ],
+      },
+      {
+        name: '俯身划船',
+        sets: [
+          { reps: 8, rpe: 7, weight: 75 },
+          { reps: 8, rpe: 8, weight: 80 },
+          { reps: 8, rpe: 8, weight: 80 },
+        ],
+      },
+    ],
+  },
+
+  // 17 天前 — 深蹲中量
+  {
+    id: uid(23),
+    date: daysAgo(17),
+    createdAt: Date.now() - 17 * 86400000,
+    exercises: [
+      {
+        name: '深蹲',
+        sets: [
+          { reps: 5, rpe: 7, weight: 130 },
+          { reps: 5, rpe: 8, weight: 135 },
+          { reps: 5, rpe: 8, weight: 135 },
+        ],
+      },
+    ],
+  },
+
+  // 22 天前 — 硬拉中量
+  {
+    id: uid(24),
+    date: daysAgo(22),
+    createdAt: Date.now() - 22 * 86400000,
+    exercises: [
+      {
+        name: '传统硬拉',
+        sets: [
+          { reps: 5, rpe: 7, weight: 150 },
+          { reps: 3, rpe: 8, weight: 170 },
+          { reps: 3, rpe: 9, weight: 175 },
+        ],
+      },
+    ],
+  },
+
+  // 25 天前 — 减载周
+  {
+    id: uid(25),
+    date: daysAgo(25),
+    createdAt: Date.now() - 25 * 86400000,
+    note: '减载',
+    exercises: [
+      {
+        name: '卧推',
+        sets: [
+          { reps: 5, rpe: 6, weight: 70 },
+          { reps: 5, rpe: 6, weight: 70 },
+        ],
+      },
+      {
+        name: '深蹲',
+        sets: [
+          { reps: 5, rpe: 6, weight: 110 },
+          { reps: 5, rpe: 6, weight: 110 },
+        ],
+      },
+    ],
+  },
+
+  // 35 天前 — 卧推
+  {
+    id: uid(26),
+    date: daysAgo(35),
+    createdAt: Date.now() - 35 * 86400000,
+    exercises: [
+      {
+        name: '卧推',
+        sets: [
+          { reps: 5, rpe: 7, weight: 82.5 },
+          { reps: 5, rpe: 8, weight: 87.5 },
+        ],
+      },
+      {
+        name: '上斜卧推',
+        sets: [
+          { reps: 8, rpe: 7, weight: 55 },
+          { reps: 8, rpe: 8, weight: 55 },
+          { reps: 8, rpe: 8, weight: 55 },
+        ],
+      },
+    ],
+  },
+
+  // 38 天前 — 深蹲
+  {
+    id: uid(27),
+    date: daysAgo(38),
+    createdAt: Date.now() - 38 * 86400000,
+    exercises: [
+      {
+        name: '低杠深蹲',
+        sets: [
+          { reps: 5, rpe: 7, weight: 130 },
+          { reps: 5, rpe: 8, weight: 140 },
+          { reps: 3, rpe: 9, weight: 150 },
+        ],
+      },
+    ],
+  },
+
+  // 42 天前 — 硬拉
+  {
+    id: uid(28),
+    date: daysAgo(42),
+    createdAt: Date.now() - 42 * 86400000,
+    exercises: [
+      {
+        name: '相扑硬拉',
+        sets: [
+          { reps: 5, rpe: 7, weight: 135 },
+          { reps: 3, rpe: 8, weight: 160 },
+          { reps: 1, rpe: 9, weight: 185 },
+        ],
+      },
+      {
+        name: '俯身划船',
+        sets: [
+          { reps: 8, rpe: 7, weight: 65 },
+          { reps: 8, rpe: 8, weight: 70 },
+          { reps: 8, rpe: 8, weight: 70 },
+        ],
+      },
+    ],
+  },
+
+  // 50 天前 — 卧推
+  {
+    id: uid(29),
+    date: daysAgo(50),
+    createdAt: Date.now() - 50 * 86400000,
+    exercises: [
+      {
+        name: '卧推',
+        sets: [
+          { reps: 5, rpe: 7, weight: 80 },
+          { reps: 5, rpe: 8, weight: 85 },
+          { reps: 3, rpe: 8, weight: 90 },
+        ],
+      },
+    ],
+  },
+
+  // 55 天前 — 深蹲
+  {
+    id: uid(30),
+    date: daysAgo(55),
+    createdAt: Date.now() - 55 * 86400000,
+    exercises: [
+      {
+        name: '深蹲',
+        sets: [
+          { reps: 5, rpe: 7, weight: 125 },
+          { reps: 5, rpe: 8, weight: 130 },
+        ],
+      },
+    ],
+  },
 ]
 
 /** 测试用动作选项列表 */

@@ -21,7 +21,7 @@ const COLORS = {
 }
 
 // tabBar 图标：生成 inactive + active 两个版本
-const TAB_ICONS = ['record', 'create', 'sbd', 'about']
+const TAB_ICONS = ['record', 'create', 'stats', 'about']
 
 // 页面内图标：指定颜色
 const PAGE_ICONS = [

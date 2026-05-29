@@ -18,7 +18,7 @@
 - 避免营销式落地页，打开后直接进入可用的训练记录体验。
 - 交互控件需要稳定、易点按，适配手机屏幕。
 - 颜色 / 表面 / 间距统一通过 `miniprogram/styles/theme.less` 的 CSS 变量与 `miniprogram/utils/theme.ts` 的 `themeColors` 维护，禁止裸色值。
-- 图标统一放在 `miniprogram/assets/icon/` 目录下，SVG 源文件通过 `generate-icons.js` 生成 PNG（仅供 tabBar 使用）。tabBar 图标名称约定：`record` / `create` / `sbd` / `about`（+ `-active` 后缀为选中态）。
+- 图标统一放在 `miniprogram/assets/icon/` 目录下，SVG 源文件通过 `generate-icons.js` 生成 PNG（仅供 tabBar 使用）。tabBar 图标名称约定：`record` / `create` / `stats` / `about`（+ `-active` 后缀为选中态）。
 - 页面内图标统一使用 **Vant Weapp** (`@vant/weapp`) 的 `van-icon` 组件，不再使用自定义 PNG。常用图标名：`calendar-o`（日期）、`delete-o`（删除）、`records`（保存）、`arrow`（箭头）、`arrow-down`（下拉）、`plus`（添加）。
 - 弹窗 / 底部面板使用 `van-popup`（position="bottom"、round）替代自定义 `sheet-mask`。
 - 标签使用 `van-tag`（如 1RM 标签）。
@@ -91,21 +91,39 @@
   - 因为导入会覆盖数据，执行导入前必须 `wx.showModal` 弹窗提醒用户确认。
   - 导入兼容旧版本（缺失 `weight` 字段时按 0 兜底）以及"裸 `TrainingRecord[]`"格式。
 
-### 7. SBD 进展页（tabBar，位于"新建"与"关于"之间）
+### 7. 统计页（tabBar，位于"新建"与"关于"之间，原 SBD 进展页）
+
+统计页的 tab 名是"统计"，页面路径为 `pages/stats/stats`。页内顶部提供三个主 tab：**Top 组 / e1RM / 周容量**。
+
+#### 7.1 Top 组 (Top set)
 
 - 用于展示用户某个三大项动作 **Top 组重量**随时间的变化趋势。
 - "Top 组"定义：当天该动作中 `reps === 1` 的训练组里 **重量最高的一组**（取唯一一个值；当天没有 1 次组则视为没有数据）。
-- 可选动作严格限定为：`卧推`、`深蹲`、`低杠深蹲`、`传统硬拉`、`相扑硬拉`。其他动作不会出现在选择弹窗中。
-  - 动作选择**复用 create 页的弹窗风格**（`van-popup` + `exercise-grid` + `exercise-option`），但去掉肌群分组 tab，仅展示这 5 个动作的单层网格。
-- 时间范围切换：`2 年` / `1 年` / `半年`，默认 `1 年`。
-  - 切换时间或动作后图表立即重绘，无需手动刷新。
-- 折线图：
-  - 使用原生 `<canvas type="2d">` 渲染，主色为 `themeColors.brandStrong`，下方渐变半透明色块。
-  - 当数据点 ≥ 2 个时绘制折线；只有 1 个数据点时仅画点；0 个数据点时图区中央显示"暂无 Top 组数据"。
-  - Y 轴自动按数据上下扩 15% 留白，刻度 4 段；X 轴标签自动疏化（首、中、尾）。
-- 顶部展示三个统计：区间内 Top 组次数、区间最高重量、最近一次重量。
-- 图表下方给出明细列表（日期 + 重量），按日期升序。
-- 数据均来自 `loadTrainingRecords()`，不引入新的存储 key。
+- 可选动作严格限定为：`卧推`、`深蹲`、`低杠深蹲`、`传统硬拉`、`相撞硬拉`。动作选择复用 create 页的弹窗风格（`van-popup` + `exercise-grid` + `exercise-option`），但去掉肌群分组 tab，仅展示这 5 个动作的单层网格。
+- 时间范围切换：`2 年` / `1 年` / `半年`，默认 `1 年`。切换时图表立即重绘。
+- 折线图使用原生 `<canvas type="2d">` 渲染，主色为 `themeColors.brandStrong`，下方渐变半透明色块。仅一个点时仅画点；零个点显示“暂无 Top 组数据”。
+- 顶部展示三个统计：区间内 Top 组次数、区间最高重量、最近一次重量；下方列出明细。
+
+#### 7.2 e1RM（估算 1RM）
+
+- 采用 **Epley 公式**：`e1RM = weight × (1 + reps / 30)`，`reps === 1` 时直接返回 weight。`reps`、`weight` 任一为非正时该组不参与计算。公式不限制 reps 上限，但 reps 越大误差越大。
+- 同一天同一动作取所有组中 **e1RM 最高的一组** 作为该日点，不限制 `reps === 1`。
+- 与 Top 组使用同一个动作选择与时间范围 switch。
+- 顶部统计：区间内训练日数、**全历史最佳 e1RM**（不受时间范围限制）、最近一次 e1RM。明细列额外展示“reps×weight”源组。
+- **PR 提示**：在 create 页保存训练（仅新增模式）时自动比对 "保存前的历史最佳 e1RM"，若本批次任一组 e1RM 超越则以 `wx.showToast` 提示 `${动作} e1RM 新高 ${值}kg`。编辑模式不触发检测。
+
+#### 7.3 周容量（Volume）
+
+- 定义：
+  - **tonnage（吨位）** = 单组 `weight × reps`，汇总到周维度。
+  - **working sets（有效组）**：当前简化为“全部已记录的组”；后续可按 RPE 阈值过滤。
+  - 周以 **周一为起点**（与国内训练计划习惯一致）。
+- 统计窗口：`4 周` / `8 周` / `12 周`，默认 `8 周`。没有训练的周以 0 占位，保证柱状图 X 轴连续。
+- 柱状图使用 canvas 渲染，最右侧（本周）柱高亮；Y 轴在 >= 1000kg 时自动转为 `t` 单位。
+- 顶部统计：总吨位、周均吨位、总有效组数。下方额外展示 **本周分拆**：本周吨位 / 组数 + 按动作拆分的 tonnage 列表（按 tonnage 降序）。
+- 周容量面板不依赖动作选择 / 时间范围 switch，只需切换周数。
+
+所有面板数据均来自 `loadTrainingRecords()`，不引入新的存储 key。SBD 可选动作常量 `SBD_EXERCISE_NAMES` 仍位于 `miniprogram/utils/constants.ts`。
 
 ## 数据模型与本地存储
 

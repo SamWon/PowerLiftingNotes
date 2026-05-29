@@ -9,6 +9,7 @@ import {
   TrainingRecord,
   TrainingSet,
   buildExerciseGroups,
+  computeE1rmBestMap,
   createDefaultSet,
   getExerciseDefinition,
   getExerciseGroupImage,
@@ -18,6 +19,7 @@ import {
   resolveGroupOfExercise,
   saveOneRepMaxMap,
   saveTrainingRecords,
+  setE1rm,
   toDateText,
 } from '../../utils/training/index'
 import { STORAGE_KEYS } from '../../utils/constants'
@@ -419,6 +421,24 @@ Component({
         }
       }
       const wasEditing = this.data.isEditing
+      // e1RM PR 检测：与"保存前"的历史最佳对比，超过则提示。
+      // 仅在新增模式下检测（编辑模式会替换原记录，导致旧值难以界定）。
+      let prToast: { exerciseName: string; e1rm: number } | null = null
+      if (!wasEditing) {
+        const prevBestMap = computeE1rmBestMap(records)
+        const exerciseName = currentExercise.name
+        const prevBest = prevBestMap[exerciseName] ? prevBestMap[exerciseName].e1rm : 0
+        let bestInBatch = 0
+        currentExercise.sets.forEach(set => {
+          const v = setE1rm(set)
+          if (v > bestInBatch) {
+            bestInBatch = v
+          }
+        })
+        if (bestInBatch > prevBest && bestInBatch > 0) {
+          prToast = { exerciseName, e1rm: bestInBatch }
+        }
+      }
       saveTrainingRecords(nextRecords)
       this.setData({
         draftSets: [createDefaultSet()],
@@ -427,7 +447,15 @@ Component({
         isEditing: false,
         note: '',
       })
-      wx.showToast({ title: wasEditing ? '已更新' : '已保存', icon: 'success' })
+      if (prToast) {
+        wx.showToast({
+          title: `${prToast.exerciseName} e1RM 新高 ${prToast.e1rm}kg`,
+          icon: 'none',
+          duration: 2400,
+        })
+      } else {
+        wx.showToast({ title: wasEditing ? '已更新' : '已保存', icon: 'success' })
+      }
       wx.switchTab({ url: '/pages/index/index' })
     },
   },

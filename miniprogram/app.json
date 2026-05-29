@@ -2,7 +2,7 @@
   "pages": [
     "pages/index/index",
     "pages/create/create",
-    "pages/sbd/sbd",
+    "pages/stats/stats",
     "pages/about/about",
     "pages/logs/logs"
   ],
@@ -38,10 +38,10 @@
         "selectedIconPath": "assets/icon/create-active.png"
       },
       {
-        "pagePath": "pages/sbd/sbd",
-        "text": "SBD",
-        "iconPath": "assets/icon/sbd.png",
-        "selectedIconPath": "assets/icon/sbd-active.png"
+        "pagePath": "pages/stats/stats",
+        "text": "统计",
+        "iconPath": "assets/icon/stats.png",
+        "selectedIconPath": "assets/icon/stats-active.png"
       },
       {
         "pagePath": "pages/about/about",

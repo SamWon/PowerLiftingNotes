@@ -1,0 +1,215 @@
+<navigation-bar title="训练统计" back="{{false}}"></navigation-bar>
+
+<view class="page-shell stats-page">
+  <view class="hero">
+    <view class="eyebrow">Training Stats</view>
+    <view class="title">训练进展与负荷</view>
+    <view class="subtitle">Top 组、估算 1RM 与周容量，量化每一阶段的进步。</view>
+  </view>
+
+  <!-- 顶部 tab -->
+  <view class="stats-tab-bar">
+    <view
+      wx:for="{{tabs}}"
+      wx:key="id"
+      class="stats-tab {{activeTab === item.id ? 'active' : ''}}"
+      data-id="{{item.id}}"
+      bindtap="switchTab"
+    >{{item.label}}</view>
+  </view>
+
+  <!-- Top 组 / e1RM 共用：动作选择 + 时间范围 -->
+  <block wx:if="{{activeTab !== 'volume'}}">
+    <view class="form-block">
+      <view class="field-label">训练动作</view>
+      <view class="exercise-card" bindtap="openPicker">
+        <view class="exercise-card-body">
+          <text class="exercise-card-name">{{selectedExerciseName}}</text>
+          <view class="exercise-card-bottom">
+            <view class="one-rm-inline">
+              <van-tag plain color="var(--brand-strong)">SBD</van-tag>
+              <text wx:if="{{selectedExerciseDesc}}" class="one-rm-empty">{{selectedExerciseDesc}}</text>
+            </view>
+            <view class="exercise-pick-btn">
+              <text>选择动作</text>
+              <van-icon name="arrow" size="24rpx" color="var(--brand-strong)" />
+            </view>
+          </view>
+        </view>
+        <image wx:if="{{selectedExerciseImage}}" class="exercise-card-img" src="{{selectedExerciseImage}}" mode="aspectFit" />
+      </view>
+    </view>
+
+    <view class="form-block">
+      <view class="field-row">
+        <view class="field-label" style="margin-bottom:0">时间范围</view>
+        <view class="switcher range-switcher">
+          <view
+            wx:for="{{rangeOptions}}"
+            wx:key="id"
+            class="switch {{activeRangeId === item.id ? 'active' : ''}}"
+            data-id="{{item.id}}"
+            bindtap="switchRange"
+          >{{item.label}}</view>
+        </view>
+      </view>
+
+      <!-- Top 组面板 -->
+      <block wx:if="{{activeTab === 'top'}}">
+        <view class="stats-stat-row">
+          <view class="stats-stat-item">
+            <text class="stats-stat-number">{{topPointCount}}</text>
+            <text class="stats-stat-label">Top 组次数</text>
+          </view>
+          <view class="stats-stat-item">
+            <text class="stats-stat-number">{{topMaxWeight > 0 ? topMaxWeight : '--'}}</text>
+            <text class="stats-stat-label">区间最高 (kg)</text>
+          </view>
+          <view class="stats-stat-item">
+            <text class="stats-stat-number">{{topLatestWeight > 0 ? topLatestWeight : '--'}}</text>
+            <text class="stats-stat-label">最近一次 (kg)</text>
+          </view>
+        </view>
+
+        <view class="chart-wrap">
+          <canvas wx:if="{{!pickerVisible}}" id="top-chart" type="2d" class="stats-chart"></canvas>
+          <view wx:else class="stats-chart"></view>
+        </view>
+        <view class="chart-caption">仅统计 1 次（Top 组）的重量，按训练日期排序。</view>
+
+        <view class="field-label section-gap">明细 · 近 {{rangeLabel}}</view>
+        <view wx:if="{{topChartPoints.length === 0}}" class="empty-line">该时间范围内没有 1 次的 Top 组记录。</view>
+        <view wx:else class="stats-point-list">
+          <view wx:for="{{topChartPoints}}" wx:key="date" class="stats-point-row">
+            <text class="stats-point-date">{{item.date}}</text>
+            <text class="stats-point-weight">{{item.weight}} kg</text>
+          </view>
+        </view>
+      </block>
+
+      <!-- e1RM 面板 -->
+      <block wx:if="{{activeTab === 'e1rm'}}">
+        <view class="stats-stat-row">
+          <view class="stats-stat-item">
+            <text class="stats-stat-number">{{e1rmPointCount}}</text>
+            <text class="stats-stat-label">训练日数</text>
+          </view>
+          <view class="stats-stat-item">
+            <text class="stats-stat-number">{{e1rmBest > 0 ? e1rmBest : '--'}}</text>
+            <text class="stats-stat-label">历史最佳 (kg)</text>
+          </view>
+          <view class="stats-stat-item">
+            <text class="stats-stat-number">{{e1rmLatest > 0 ? e1rmLatest : '--'}}</text>
+            <text class="stats-stat-label">最近一次 (kg)</text>
+          </view>
+        </view>
+
+        <view class="chart-wrap">
+          <canvas wx:if="{{!pickerVisible}}" id="e1rm-chart" type="2d" class="stats-chart"></canvas>
+          <view wx:else class="stats-chart"></view>
+        </view>
+        <view class="chart-caption">基于 Epley 公式：e1RM = 重量 × (1 + 次数 / 30)，取当日该动作所有组中最高值。</view>
+
+        <view class="field-label section-gap">明细 · 近 {{rangeLabel}}</view>
+        <view wx:if="{{e1rmChartPoints.length === 0}}" class="empty-line">该时间范围内没有可用于估算 1RM 的训练组。</view>
+        <view wx:else class="stats-point-list">
+          <view wx:for="{{e1rmChartPoints}}" wx:key="date" class="stats-point-row">
+            <view class="stats-point-meta">
+              <text class="stats-point-date">{{item.date}}</text>
+              <text class="stats-point-sub">{{item.reps}}次 × {{item.fromWeight}}kg</text>
+            </view>
+            <text class="stats-point-weight">{{item.weight}} kg</text>
+          </view>
+        </view>
+      </block>
+    </view>
+  </block>
+
+  <!-- 周容量面板 -->
+  <block wx:if="{{activeTab === 'volume'}}">
+    <view class="form-block">
+      <view class="field-label">训练模块</view>
+      <view class="group-chip-grid">
+        <view
+          wx:for="{{groupOptions}}"
+          wx:key="id"
+          class="group-chip {{activeGroupId === item.id ? 'active' : ''}}"
+          data-id="{{item.id}}"
+          bindtap="switchGroup"
+        >
+          <image wx:if="{{item.imageUrl}}" class="group-chip-img" src="{{item.imageUrl}}" mode="aspectFit" />
+          <text>{{item.label}}</text>
+        </view>
+      </view>
+
+      <view class="field-row" style="margin-top:24rpx">
+        <view class="field-label" style="margin-bottom:0">统计周数</view>
+        <view class="switcher range-switcher">
+          <view
+            wx:for="{{weeksOptions}}"
+            wx:key="id"
+            class="switch {{activeWeeksId === item.id ? 'active' : ''}}"
+            data-id="{{item.id}}"
+            bindtap="switchWeeks"
+          >{{item.label}}</view>
+        </view>
+      </view>
+
+      <view class="stats-stat-row">
+        <view class="stats-stat-item">
+          <text class="stats-stat-number">{{volumeTotalTonnage}}</text>
+          <text class="stats-stat-label">区间总吨位 (kg)</text>
+        </view>
+        <view class="stats-stat-item">
+          <text class="stats-stat-number">{{volumeAvgTonnage}}</text>
+          <text class="stats-stat-label">周均吨位</text>
+        </view>
+        <view class="stats-stat-item">
+          <text class="stats-stat-number">{{volumeTotalSets}}</text>
+          <text class="stats-stat-label">有效组数</text>
+        </view>
+      </view>
+
+      <view class="chart-wrap">
+        <canvas id="volume-chart" type="2d" class="stats-chart"></canvas>
+      </view>
+      <view class="chart-caption">「{{activeGroupLabel}}」每周总吨位 = ∑(重量 × 次数)；最右侧高亮柱为本周。</view>
+    </view>
+
+    <view class="form-block">
+      <view class="field-label">{{volumeLatestLabel}}</view>
+      <view class="volume-summary">
+        <view class="volume-summary-item">
+          <text class="volume-summary-num">{{volumeLatestTonnage}}</text>
+          <text class="volume-summary-lbl">本周吨位 (kg)</text>
+        </view>
+        <view class="volume-summary-item">
+          <text class="volume-summary-num">{{volumeLatestSets}}</text>
+          <text class="volume-summary-lbl">本周组数</text>
+        </view>
+      </view>
+
+      <view class="field-label section-gap">动作拆分 · {{activeGroupLabel}}</view>
+      <view wx:if="{{volumeLatestBreakdown.length === 0}}" class="empty-line">本周「{{activeGroupLabel}}」还没有训练记录。</view>
+      <view wx:else class="stats-point-list">
+        <view wx:for="{{volumeLatestBreakdown}}" wx:key="name" class="stats-point-row">
+          <view class="stats-point-meta">
+            <text class="stats-point-date">{{item.name}}</text>
+            <text class="stats-point-sub">{{item.sets}} 组</text>
+          </view>
+          <text class="stats-point-weight">{{item.tonnage}} kg</text>
+        </view>
+      </view>
+    </view>
+  </block>
+</view>
+
+<!-- 动作选择弹窗（仅 Top / e1RM 面板使用） -->
+<exercise-picker
+  show="{{pickerVisible}}"
+  mode="flat"
+  selectedName="{{selectedExerciseName}}"
+  exerciseCards="{{exerciseCards}}"
+  bind:close="closePicker"
+  bind:select="chooseExercise"
+/>
