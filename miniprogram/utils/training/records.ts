@@ -9,7 +9,8 @@ export const createDefaultSet = (): DraftSet => ({
 })
 
 export const sortRecords = (records: TrainingRecord[]) => {
-  return records.sort(
+  // 克隆后再排序，避免修改调用方传入的数组（隐藏副作用易出 bug）。
+  return [...records].sort(
     (first, second) =>
       second.date.localeCompare(first.date) || second.createdAt - first.createdAt,
   )
@@ -39,10 +40,13 @@ export const normalizeSet = (value: any): TrainingSet => ({
 export const normalizeRecord = (record: TrainingRecord): TrainingRecord => ({
   ...record,
   note: typeof record.note === 'string' ? record.note : undefined,
-  exercises: record.exercises.map(exercise => ({
-    ...exercise,
-    sets: exercise.sets.map(normalizeSet),
-  })),
+  // 防护 exercises 缺失或不是数组的脑裂场景（旧数据或损坏数据）。
+  exercises: Array.isArray(record.exercises)
+    ? record.exercises.map(exercise => ({
+        ...exercise,
+        sets: Array.isArray(exercise && exercise.sets) ? exercise.sets.map(normalizeSet) : [],
+      }))
+    : [],
 })
 
 export const isTrainingSet = (value: unknown): value is TrainingSet => {

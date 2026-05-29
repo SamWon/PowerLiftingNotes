@@ -31,16 +31,18 @@ export const buildExportPayload = (records: TrainingRecord[]): ExportPayload => 
  * 3. 历史版本：直接是 TrainingRecord[]。
  */
 export const normalizeImportedRecords = (content: string): TrainingRecord[] => {
+  // JSON.parse 失败会原样抛出 SyntaxError，让调用方按需处理（页面会展示"JSON 格式错误"）。
   const parsed = JSON.parse(content) as ExportPayload | TrainingRecord[]
-  const rawRecords = Array.isArray(parsed) ? parsed : parsed.records
+  const rawRecords = Array.isArray(parsed) ? parsed : parsed && parsed.records
   if (!Array.isArray(rawRecords)) {
-    throw new Error('Invalid training records file')
+    throw new Error('文件格式不符（缺少 records 数组）')
   }
   const records = rawRecords.map(record =>
     record && typeof record === 'object' ? normalizeRecord(record) : record,
   )
-  if (!records.every(isTrainingRecord)) {
-    throw new Error('Invalid training records file')
+  const firstInvalidIndex = records.findIndex(record => !isTrainingRecord(record))
+  if (firstInvalidIndex !== -1) {
+    throw new Error(`第 ${firstInvalidIndex + 1} 条记录字段不完整或非法`)
   }
   return records
 }

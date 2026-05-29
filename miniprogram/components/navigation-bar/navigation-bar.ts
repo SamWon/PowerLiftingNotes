@@ -60,17 +60,25 @@ Component({
   lifetimes: {
     attached() {
       const rect = wx.getMenuButtonBoundingClientRect()
-      wx.getSystemInfo({
-        success: (res) => {
-          const isAndroid = res.platform === 'android'
-          const isDevtools = res.platform === 'devtools'
-          this.setData({
-            ios: !isAndroid,
-            innerPaddingRight: `padding-right: ${res.windowWidth - rect.left}px`,
-            leftWidth: `width: ${res.windowWidth - rect.left }px`,
-            safeAreaTop: isDevtools || isAndroid ? `height: calc(var(--height) + ${res.safeArea.top}px); padding-top: ${res.safeArea.top}px` : ``
-          })
-        }
+      // 优先使用新版分离 API（wx.getWindowInfo / wx.getDeviceInfo），
+      // 老基础库 fallback 到 wx.getSystemInfoSync，避免命中已废弃的 wx.getSystemInfo。
+      const wxAny = wx as unknown as {
+        getWindowInfo?: () => WechatMiniprogram.SystemInfo
+        getDeviceInfo?: () => { platform: string }
+      }
+      const windowInfo = (wxAny.getWindowInfo && wxAny.getWindowInfo())
+        || wx.getSystemInfoSync()
+      const deviceInfo = (wxAny.getDeviceInfo && wxAny.getDeviceInfo())
+        || (wx.getSystemInfoSync() as unknown as { platform: string })
+      const isAndroid = deviceInfo.platform === 'android'
+      const isDevtools = deviceInfo.platform === 'devtools'
+      this.setData({
+        ios: !isAndroid,
+        innerPaddingRight: `padding-right: ${windowInfo.windowWidth - rect.left}px`,
+        leftWidth: `width: ${windowInfo.windowWidth - rect.left}px`,
+        safeAreaTop: isDevtools || isAndroid
+          ? `height: calc(var(--height) + ${windowInfo.safeArea.top}px); padding-top: ${windowInfo.safeArea.top}px`
+          : ``,
       })
     },
   },

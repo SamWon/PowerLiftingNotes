@@ -6,11 +6,10 @@ import {
   getExerciseGroupImage,
   loadTrainingRecords,
   toExerciseCard,
+  tryParseDateText,
 } from '../../utils/training/index'
+import { SBD_EXERCISE_NAMES } from '../../utils/constants'
 import { themeColors } from '../../utils/theme'
-
-/** 允许在 SBD 页选择的动作（按出现顺序）。 */
-const SBD_EXERCISE_NAMES = ['卧推', '深蹲', '低杠深蹲', '传统硬拉', '相扑硬拉']
 
 /** 时间范围选项。 */
 type RangeKey = 'half' | 'year' | 'twoYears'
@@ -79,23 +78,7 @@ const computeRangeStart = (months: number): Date => {
   return start
 }
 
-const parseDate = (text: string): Date | null => {
-  if (!text) {
-    return null
-  }
-  const parts = text.split('-')
-  if (parts.length !== 3) {
-    return null
-  }
-  const year = Number(parts[0])
-  const month = Number(parts[1])
-  const day = Number(parts[2])
-  if (!Number.isFinite(year) || !Number.isFinite(month) || !Number.isFinite(day)) {
-    return null
-  }
-  const date = new Date(year, month - 1, day)
-  return Number.isNaN(date.getTime()) ? null : date
-}
+const parseDate = (text: string): Date | null => tryParseDateText(text)
 
 const formatShortDate = (text: string): string => {
   const date = parseDate(text)
@@ -223,7 +206,15 @@ Component<SbdPageData, Record<string, never>, SbdMethods>({
           const node = res[0].node as WechatMiniprogram.Canvas
           const width = res[0].width
           const height = res[0].height
-          const dpr = wx.getSystemInfoSync().pixelRatio
+          // dpr 在生命周期内基本不变，缓存到组件实例上，避免每次重绘都调用 wx API。
+          // wx.getSystemInfoSync 已废弃，优先用 wx.getWindowInfo。
+          const self = this as unknown as { __dpr?: number }
+          if (!self.__dpr) {
+            const win = (wx as unknown as { getWindowInfo?: () => { pixelRatio: number } })
+              .getWindowInfo
+            self.__dpr = win ? win.call(wx).pixelRatio : wx.getSystemInfoSync().pixelRatio
+          }
+          const dpr = self.__dpr || 1
           node.width = width * dpr
           node.height = height * dpr
           // 2d canvas context（mini program 内为标准 W3C 风格 API）

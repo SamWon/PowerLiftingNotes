@@ -14,7 +14,9 @@
  * save 函数在测试模式下为空操作，保护真实数据不被覆写。
  */
 
-const DEV_SWITCH_KEY = '__devUseTestData'
+import { STORAGE_KEYS } from '../constants'
+
+const DEV_SWITCH_KEY = STORAGE_KEYS.DEV_USE_TEST_DATA
 
 /**
  * 判断当前是否处于测试数据模式。

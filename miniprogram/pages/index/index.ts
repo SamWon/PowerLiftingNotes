@@ -11,6 +11,7 @@ import {
   saveTrainingRecords,
   toDateText,
 } from '../../utils/training/index'
+import { STORAGE_KEYS } from '../../utils/constants'
 import { themeColors } from '../../utils/theme'
 
 type RecordViewMode = 'list' | 'calendar'
@@ -36,7 +37,7 @@ interface RecordViewModel {
   note: string
 }
 
-const EDITING_KEY = 'powerlifting_editing_record_id'
+const EDITING_KEY = STORAGE_KEYS.EDITING_RECORD_ID
 
 const buildSetChip = (set: TrainingSet, oneRepMax: number): SetChip => {
   const parts: string[] = [`${set.reps}次`]

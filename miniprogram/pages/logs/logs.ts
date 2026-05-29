@@ -1,21 +1,20 @@
 // logs.ts
-// const util = require('../../utils/util.js')
 import { formatTime } from '../../utils/util'
+import { STORAGE_KEYS } from '../../utils/constants'
 
 Component({
   data: {
-    logs: [],
+    logs: [] as Array<{ date: string; timeStamp: string }>,
   },
   lifetimes: {
     attached() {
+      const raw = (wx.getStorageSync(STORAGE_KEYS.LOGS) || []) as string[]
       this.setData({
-        logs: (wx.getStorageSync('logs') || []).map((log: string) => {
-          return {
-            date: formatTime(new Date(log)),
-            timeStamp: log
-          }
-        }),
+        logs: raw.map((log: string) => ({
+          date: formatTime(new Date(log)),
+          timeStamp: log,
+        })),
       })
-    }
+    },
   },
 })

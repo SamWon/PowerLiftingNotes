@@ -20,6 +20,7 @@ import {
   saveTrainingRecords,
   toDateText,
 } from '../../utils/training/index'
+import { STORAGE_KEYS } from '../../utils/constants'
 
 interface ExerciseDetailView {
   name: string
@@ -29,7 +30,7 @@ interface ExerciseDetailView {
   techniqueTips: string[]
 }
 
-const EDITING_KEY = 'powerlifting_editing_record_id'
+const EDITING_KEY = STORAGE_KEYS.EDITING_RECORD_ID
 
 /** 把 1RM × 百分比按 0.5kg 精度换算成 kg，便于杠铃配重。 */
 const computeWeightFromPercent = (oneRepMax: number, percent: number) => {
@@ -132,13 +133,14 @@ Component({
     loadExerciseData() {
       const oneRepMaxMap = loadOneRepMaxMap()
       const exercises = DEFAULT_EXERCISES
-      const exerciseGroups = buildExerciseGroups()
+      // exerciseGroups 是从静态 config 构建的，整个页面生命周期内不会变；
+      // 复用 INITIAL_GROUPS 避免每次 onShow 都带着 30+ 动作定义重新 setData。
+      const exerciseGroups = this.data.exerciseGroups.length ? this.data.exerciseGroups : INITIAL_GROUPS
       const selected = exercises.includes(this.data.selectedExerciseName)
         ? this.data.selectedExerciseName
         : exercises[0]
       this.setData({
         exercises,
-        exerciseGroups,
         activeGroupId: resolveGroupOfExercise(selected, exerciseGroups),
         selectedExerciseName: selected,
         selectedExerciseInitial: selected.charAt(0) || '?',
@@ -199,13 +201,12 @@ Component({
       wx.switchTab({ url: '/pages/index/index' })
     },
     openExercisePicker() {
-      // 打开时把 tab 切到当前选中动作所属的分组，避免用户找不到当前动作。
-      // 同时重建 exerciseGroups，确保第二次及以后打开时 wx:for 能正确渲染。
-      const exerciseGroups = buildExerciseGroups()
+      // 打开时把 tab 切到当前选中动作所属分组，避免用户找不到当前动作。
+      // exerciseGroups 在 attached 时已初始化，打开选择器时只需更新 visible + activeGroupId，
+      // 不再重复传输 30+ 个动作定义到 view 层。
       this.setData({
-        exerciseGroups,
         exercisePickerVisible: true,
-        activeGroupId: resolveGroupOfExercise(this.data.selectedExerciseName, exerciseGroups),
+        activeGroupId: resolveGroupOfExercise(this.data.selectedExerciseName, this.data.exerciseGroups),
       })
     },
     closeExercisePicker() {

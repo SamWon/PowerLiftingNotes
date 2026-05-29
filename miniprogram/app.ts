@@ -1,5 +1,6 @@
 // app.ts
 import { themeColors } from './utils/theme'
+import { STORAGE_KEYS } from './utils/constants'
 
 const applyTabBarTheme = () => {
   wx.setTabBarStyle({
@@ -13,7 +14,7 @@ const applyTabBarTheme = () => {
 App<IAppOption>({
   globalData: {},
   onLaunch() {
-    wx.setStorageSync('powerlifting_app_ready', true)
+    wx.setStorageSync(STORAGE_KEYS.APP_READY, true)
     applyTabBarTheme()
     wx.onThemeChange(() => applyTabBarTheme())
   },

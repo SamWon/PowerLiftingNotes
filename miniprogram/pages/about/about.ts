@@ -8,6 +8,7 @@ import {
   saveTrainingRecords,
   toDateText,
 } from '../../utils/training/index'
+import { MAX_IMPORT_FILE_BYTES, MAX_IMPORT_FILES } from '../../utils/constants'
 import { themeColors } from '../../utils/theme'
 
 interface ShareFileMessageOption {
@@ -90,7 +91,7 @@ Component({
             return
           }
           wx.chooseMessageFile({
-            count: 20,
+            count: MAX_IMPORT_FILES,
             type: 'file',
             extension: ['json'],
             success: (chooseResult) => this.readImportFiles(chooseResult.tempFiles),
@@ -102,6 +103,16 @@ Component({
       if (files.length === 0) {
         return
       }
+      // 事先检查文件体积，避免误选超大文件导致 OOM 或 UI 卡死。
+      const tooBig = files.find(file => typeof file.size === 'number' && file.size > MAX_IMPORT_FILE_BYTES)
+      if (tooBig) {
+        wx.showModal({
+          title: '文件过大',
+          content: `${tooBig.name || '选中的文件'} 超过 ${Math.round(MAX_IMPORT_FILE_BYTES / 1024 / 1024)} MB，请检查后重试。`,
+          showCancel: false,
+        })
+        return
+      }
       const fileManager = wx.getFileSystemManager()
       const tasks = files.map(file => new Promise<TrainingRecord[]>((resolve, reject) => {
         fileManager.readFile({
@@ -111,10 +122,15 @@ Component({
             try {
               resolve(normalizeImportedRecords(String(result.data)))
             } catch (error) {
-              reject(error)
+              // 包装原始错误，保留文件名便于下轮开互。
+              const wrapped = new Error(
+                error instanceof Error ? error.message : 'Unknown parse error',
+              ) as Error & { fileName?: string }
+              wrapped.fileName = file.name
+              reject(wrapped)
             }
           },
-          fail: reject,
+          fail: (err) => reject(Object.assign(new Error(err.errMsg || '读取失败'), { fileName: file.name })),
         })
       }))
       Promise.all(tasks)
@@ -124,11 +140,17 @@ Component({
           this.loadSummary()
           wx.showToast({ title: '导入完成', icon: 'success' })
         })
-        .catch(() => wx.showModal({
-          title: '导入失败',
-          content: '文件内容无法识别，请确认使用的是本应用导出的 JSON 文件。',
-          showCancel: false,
-        }))
+        .catch((error: Error & { fileName?: string }) => {
+          const fileLabel = error && error.fileName ? `《${error.fileName}》` : ''
+          const reason = error instanceof SyntaxError
+            ? 'JSON 格式错误'
+            : (error && error.message) || '未知错误'
+          wx.showModal({
+            title: '导入失败',
+            content: `${fileLabel}${reason}。\n请确认使用的是本应用导出的 JSON 文件。`,
+            showCancel: false,
+          })
+        })
     },
   },
 })
